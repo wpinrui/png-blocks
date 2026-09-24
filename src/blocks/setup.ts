@@ -1,3 +1,4 @@
+import * as En from "blockly/msg/en";
 import * as SB from "scratch-blocks";
 import { CATALOG, type BlockDef } from "../catalog";
 import { renderSvg } from "../render";
@@ -393,8 +394,17 @@ let done = false;
 export function setupBlocks() {
   if (done) return;
   done = true;
+  // Blockly's own strings (context menu items and so on) are not bundled
+  // with blockly/core; Scratch's strings then override the shared keys.
+  SB.setLocale(En as unknown as Record<string, string>);
   SB.ScratchMsgs.setLocale("en");
   defineCoreMenus();
   for (const b of EXTENSION_BLOCKS) defineExtensionBlock(b);
   setupPrompts();
+  // Items Blockly adds that the Scratch editor does not offer.
+  for (const id of ["blockInline", "blockHelp", "blockCollapseExpand", "blockDisable", "collapseWorkspace", "expandWorkspace"]) {
+    if (SB.ContextMenuRegistry.registry.getItem(id)) {
+      SB.ContextMenuRegistry.registry.unregister(id);
+    }
+  }
 }
