@@ -65,6 +65,23 @@
   --color-cat-pen: #0fbd8c;
   --color-cat-pen-edge: #0b8e69;
 
+  /* Dark mode palette. Only the page background and the bars use it;
+     menus, dialogs, toasts and blocks keep the light palette. */
+  --dark-bg: #1b1f27;
+  --dark-header: #151920;
+  --dark-surface: #232833;
+  --dark-canvas: #1e222b;
+  --dark-flyout: #262b36;
+  --dark-border: #343b49;
+  --dark-border-soft: #2d3340;
+  --dark-hover: #2c3240;
+  --dark-selected: #313a4d;
+  --dark-text: #e4e8f0;
+  --dark-text-muted: #a3acbd;
+  --dark-text-faint: #7b8496;
+  --dark-grid: #3a4150;
+  --dark-link: #7fb2ff;
+
   --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-size-base: 14px;
   --font-size-caption: 13px;

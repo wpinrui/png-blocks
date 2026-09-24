@@ -6,8 +6,10 @@ import {
   Download,
   FileX,
   type LucideIcon,
+  Moon,
   Plus,
   Search,
+  Sun,
   X,
 } from "lucide-react";
 import * as SB from "scratch-blocks";
@@ -82,6 +84,22 @@ function saveTabs(state: TabState) {
   } catch {
     // Storage full or blocked: keep working in memory.
   }
+}
+
+type Theme = "light" | "dark";
+const THEME_KEY = "sbp-theme";
+
+// Saved choice first, else the system setting.
+function loadTheme(): Theme {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light" || saved === "dark") return saved;
+  } catch {
+    // Fall back to the system setting.
+  }
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 function tutorialDismissed(): boolean {
@@ -282,6 +300,7 @@ export function App() {
   const [query, setQuery] = useState("");
   const [scale, setScaleState] = useState(loadScale);
   const [showExtensions, setShowExtensions] = useState(false);
+  const [theme, setTheme] = useState<Theme>(loadTheme);
   const [extAnim, setExtAnim] = useState<"opening" | "closing" | null>(null);
   const [extSep, setExtSep] = useState<HTMLElement | null>(null);
   const [overlay, setOverlay] = useState<Overlay | null>(null);
@@ -484,6 +503,20 @@ export function App() {
   }, [overlay]);
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch {
+      // Applies for this visit only.
+    }
+  }
 
   const activeTab = state.tabs.find((t) => t.id === state.active);
 
@@ -812,6 +845,19 @@ export function App() {
         </nav>
 
         <div className="header-actions">
+          <button
+            type="button"
+            className="icon-btn theme-toggle"
+            aria-label={theme === "dark" ? "Light mode" : "Dark mode"}
+            data-tip={theme === "dark" ? "Light mode" : "Dark mode"}
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? (
+              <Sun size={18} aria-hidden="true" />
+            ) : (
+              <Moon size={18} aria-hidden="true" />
+            )}
+          </button>
           <div className="copy-split">
             <button
               type="button"
@@ -925,7 +971,7 @@ export function App() {
           >
             scratchblocks
           </a>{" "}
-          (MIT). Built by{" "}
+          (MIT). Built with{" "}
           <a
             href="https://claude.com/claude-code"
             target="_blank"
