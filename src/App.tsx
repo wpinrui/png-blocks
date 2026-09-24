@@ -61,7 +61,7 @@ function loadScale(): number {
   } catch {
     // Use the default.
   }
-  return 2;
+  return 1;
 }
 
 function ensureDefaults(ws: SB.WorkspaceSvg) {
