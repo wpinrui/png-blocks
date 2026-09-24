@@ -30,7 +30,12 @@ const SCALE_KEY = "sbp-scale";
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 4;
 const START_ZOOM = 0.675;
-const ZOOM_STEP = 1.1;
+// Zoom in percent of START_ZOOM: buttons step 80, 100, 120, ...; the wheel
+// moves linearly by WHEEL_PERCENT per 50px notch.
+const ZOOM_STEP_PERCENT = 20;
+const WHEEL_PERCENT = 10;
+const MIN_ZOOM_PERCENT = 20;
+const MAX_ZOOM_PERCENT = 400;
 
 const newId = () => Math.random().toString(36).slice(2, 10);
 
@@ -135,6 +140,30 @@ function offsetPalette(ws: SB.WorkspaceSvg, top: number) {
       this.height_ - 2 * this.CORNER_RADIUS,
     );
     this.positionAt_(this.getWidth(), this.getHeight(), this.getX(), top);
+  };
+}
+
+// Blockly zooms by multiplying scaleSpeed^amount. Swap that for linear
+// steps, still letting Blockly do the zoom around the pointer.
+function linearZoom(ws: SB.WorkspaceSvg) {
+  const zoom = ws.zoom.bind(ws);
+  const speed = ws.options.zoomOptions.scaleSpeed;
+  ws.zoom = (x: number, y: number, amount: number) => {
+    const percent = (ws.scale / START_ZOOM) * 100;
+    let next: number;
+    if (Math.abs(amount) === 1) {
+      const steps = percent / ZOOM_STEP_PERCENT;
+      next =
+        amount > 0
+          ? (Math.floor(steps + 1e-6) + 1) * ZOOM_STEP_PERCENT
+          : (Math.ceil(steps - 1e-6) - 1) * ZOOM_STEP_PERCENT;
+    } else {
+      next = percent + amount * WHEEL_PERCENT;
+    }
+    next = Math.min(MAX_ZOOM_PERCENT, Math.max(MIN_ZOOM_PERCENT, next));
+    const target = (next / 100) * START_ZOOM;
+    if (Math.abs(target - ws.scale) < 1e-9) return;
+    zoom(x, y, Math.log(target / ws.scale) / Math.log(speed));
   };
 }
 
@@ -322,7 +351,8 @@ export function App() {
         controls: true,
         wheel: true,
         startScale: START_ZOOM,
-        scaleSpeed: ZOOM_STEP,
+        minScale: (MIN_ZOOM_PERCENT / 100) * START_ZOOM,
+        maxScale: (MAX_ZOOM_PERCENT / 100) * START_ZOOM,
       },
       grid: { spacing: 40, length: 2, colour: grid },
       comments: true,
@@ -341,6 +371,7 @@ export function App() {
       SB.ScratchProcedures.getProceduresCategory,
     );
     wsRef.current = ws;
+    linearZoom(ws);
     offsetPalette(
       ws,
       Number.parseFloat(getComputedStyle(div).getPropertyValue("--strip-height")),
