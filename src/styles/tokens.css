@@ -68,20 +68,20 @@
 
   /* Dark mode palette: neutral greys, darkest for the header, lightest for
      panels. Blocks and their text fields never use it. */
-  --dark-header: #111111;
-  --dark-bg: #181818;
-  --dark-canvas: #202020;
-  --dark-flyout: #2a2a2a;
-  --dark-surface: #303030;
-  --dark-hover: #3a3a3a;
-  --dark-hover-strong: #454545;
-  --dark-selected: #4a4a4a;
-  --dark-border: #505050;
-  --dark-border-soft: #3c3c3c;
-  --dark-text: #f2f2f2;
-  --dark-text-muted: #b8b8b8;
-  --dark-text-faint: #8c8c8c;
-  --dark-grid: #3e3e3e;
+  --dark-header: #0b0b0b;
+  --dark-bg: #141414;
+  --dark-canvas: #1e1e1e;
+  --dark-flyout: #2b2b2b;
+  --dark-surface: #353535;
+  --dark-hover: #404040;
+  --dark-hover-strong: #4d4d4d;
+  --dark-selected: #535353;
+  --dark-border: #5c5c5c;
+  --dark-border-soft: #444444;
+  --dark-text: #f5f5f5;
+  --dark-text-muted: #c2c2c2;
+  --dark-text-faint: #929292;
+  --dark-grid: #3f3f3f;
   --dark-link: #7fb2ff;
 
   --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
