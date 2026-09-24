@@ -598,7 +598,18 @@ export function App() {
     },
     load: loadInto,
     setQuery,
-    copy,
+    // Browsers refuse clipboard writes the page starts on its own, so the
+    // demo only shows the toast a real copy would.
+    copy: async () => {
+      const ws = wsRef.current;
+      if (!ws) return;
+      const [w, h] = estimateSize(ws, scale);
+      showToast({
+        tone: "success",
+        title: "Copied to clipboard",
+        body: `${w} × ${h} px at ${formatScale(scale)}`,
+      });
+    },
   };
 
   async function copy() {
