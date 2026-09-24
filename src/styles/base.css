@@ -649,6 +649,23 @@ input::placeholder {
   background: var(--color-bg);
 }
 
+/* Extension icons are drawn white for use on a block, so give them the
+   extension colour behind them as Scratch does. */
+.workspace .categoryIconBubble {
+  display: block;
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 50%;
+  border: 1px solid var(--color-cat-pen-edge);
+  background: var(--color-cat-pen);
+}
+
+/* Long extension names ("LEGO MINDSTORMS EV3") need a wider column. */
+.workspace-wrap.ext .scratchCategoryMenu {
+  width: 88px;
+}
+
 .workspace .scratchCategoryMenuItem.categorySelected {
   background: var(--color-selected);
   color: var(--color-text);
