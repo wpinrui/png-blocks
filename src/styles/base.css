@@ -898,6 +898,38 @@ input::placeholder {
   box-shadow: var(--shadow-popover);
 }
 
+.toast.success {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: var(--color-success-text);
+}
+
+.toast.warning {
+  background: var(--color-warning-bg);
+  border-color: var(--color-warning-border);
+  color: var(--color-warning-text);
+}
+
+.toast.error {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
+  color: var(--color-error-text);
+}
+
+/* Body text and the dismiss button take the toast's tint. */
+.toast .toast-body span,
+.toast .icon-btn {
+  color: inherit;
+}
+
+.toast .toast-body span {
+  opacity: 0.85;
+}
+
+.toast .icon-btn:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
 .toast-body {
   display: flex;
   flex-direction: column;
