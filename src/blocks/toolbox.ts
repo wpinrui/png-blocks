@@ -351,6 +351,7 @@ function labelOf(xml: string): string {
 export function searchToolboxXml(
   query: string,
   workspace: SB.WorkspaceSvg,
+  showExtensions: boolean,
 ): string {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   const hits: string[] = [];
@@ -363,7 +364,7 @@ export function searchToolboxXml(
       .filter((el) => el.tagName.toLowerCase() === "block")
       .map((el) => SB.Xml.domToText(el));
   };
-  for (const c of allCategories()) {
+  for (const c of showExtensions ? allCategories() : CORE) {
     const items = c.custom ? dynamic(c) : c.items;
     for (const item of items) {
       if (item === SEP) continue;
