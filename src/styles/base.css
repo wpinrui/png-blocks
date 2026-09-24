@@ -1293,8 +1293,9 @@ input::placeholder {
   stroke: var(--dark-border);
 }
 
-:root[data-theme="dark"] .workspace pattern line {
-  stroke: var(--dark-grid);
+/* Canvas grid dots, in both modes (Blockly only takes a colour at inject). */
+.workspace pattern line {
+  stroke: var(--color-grid);
 }
 
 :root[data-theme="dark"] .ext-toggle,
