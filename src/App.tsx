@@ -84,9 +84,22 @@ function loadXml(ws: SB.WorkspaceSvg, xml: string) {
   rerenderToolbox(ws);
 }
 
+type SelectableToolbox = {
+  forceRerender(): void;
+  getSelectedItem(): unknown;
+  getToolboxItems(): { isSelectable(): boolean }[];
+  setSelectedItem(item: unknown): void;
+};
+
 // scratch-blocks' toolbox ignores refreshSelection; it must be forced.
+// It also starts with no category highlighted, so default to the first.
 function rerenderToolbox(ws: SB.WorkspaceSvg) {
-  (ws.getToolbox() as unknown as { forceRerender(): void }).forceRerender();
+  const toolbox = ws.getToolbox() as unknown as SelectableToolbox;
+  toolbox.forceRerender();
+  if (!toolbox.getSelectedItem()) {
+    const first = toolbox.getToolboxItems().find((i) => i.isSelectable());
+    if (first) toolbox.setSelectedItem(first);
+  }
 }
 
 type PositionedFlyout = {
