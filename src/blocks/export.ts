@@ -74,7 +74,10 @@ export async function workspacePng(
   workspace: SB.WorkspaceSvg,
   scale: number,
 ): Promise<Blob> {
-  SB.common.setSelected(null);
+  // Drop the selection outline without going through the focus manager,
+  // which rejects a null selection.
+  const selected = SB.common.getSelected() as { unselect?: () => void } | null;
+  selected?.unselect?.();
   const canvas = workspace.getCanvas();
   const box = canvas.getBBox();
   if (box.width === 0 || box.height === 0) throw new Error("Nothing to copy");
