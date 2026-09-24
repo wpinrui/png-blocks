@@ -761,7 +761,7 @@ export function App() {
             <button
               type="button"
               className="copy-main"
-              title="Copy this tab as a transparent PNG"
+              title="Copy PNG"
               onClick={() => void copy()}
             >
               Copy PNG
@@ -825,13 +825,7 @@ export function App() {
           )}
           {empty && (
             <div className="empty-hint">
-              <div>
-                <strong>Drag blocks here</strong>
-                <span>
-                  Copy PNG crops the image to exactly the blocks on this tab,
-                  with a transparent background.
-                </span>
-              </div>
+              <strong>Drag blocks here</strong>
             </div>
           )}
         </div>

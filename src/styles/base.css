@@ -637,23 +637,9 @@ input::placeholder {
   z-index: 1;
 }
 
-.empty-hint div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-width: 320px;
-  text-align: center;
-}
-
 .empty-hint strong {
   font-size: 15px;
   color: var(--color-text-scratch);
-}
-
-.empty-hint span {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-  text-wrap: pretty;
 }
 
 /* scratch-blocks toolbox, restyled to match the app chrome. */

@@ -96,7 +96,6 @@ function customValidator(menu: string, colour: string) {
       title: "Other value",
       label: "Value",
       initial: "",
-      hint: "Saved to this menu for next time.",
       confirm: "Use value",
       tone: MENU_TONES[colour] ?? "more",
     }).then((text) => {
@@ -408,9 +407,6 @@ function setupPrompts() {
           : varType === "list"
             ? "e.g. high scores"
             : "e.g. score",
-        hint: isMessage
-          ? undefined
-          : "Lives in this tab. Duplicating the tab copies it too.",
         confirm: renaming ? "Rename" : "Create",
         tone: VAR_TONES[varType ?? ""] ?? "data",
       }).then((text) => callback(text as string, []));
