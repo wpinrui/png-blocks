@@ -89,7 +89,6 @@ export async function workspacePng(
   const svg = document.createElementNS(svgNs, "svg");
   const w = box.width + pad * 2;
   const h = box.height + pad * 2;
-  svg.setAttribute("xmlns", svgNs);
   svg.setAttribute("width", String(w * scale));
   svg.setAttribute("height", String(h * scale));
   svg.setAttribute(
@@ -127,7 +126,16 @@ export async function copyWorkspace(
   workspace: SB.WorkspaceSvg,
   scale: number,
 ): Promise<void> {
-  await navigator.clipboard.write([
-    new ClipboardItem({ "image/png": workspacePng(workspace, scale) }),
-  ]);
+  // Chrome reports any render failure as a generic DataError, so keep the
+  // real one to rethrow.
+  let failure: unknown;
+  const png = workspacePng(workspace, scale).catch((e: unknown) => {
+    failure = e;
+    throw e;
+  });
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);
+  } catch (e) {
+    throw failure ?? e;
+  }
 }
