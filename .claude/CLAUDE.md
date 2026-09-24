@@ -10,7 +10,7 @@ Suspended until MVP ships:
 - Merge authorization. `-m` is not required and not wanted. Finish a slice, land it, keep going. No pre-merge checklist, no waiting, no asking. **The branch and PR themselves are not suspended** (see below); only the gate in front of the merge is.
 - Requirements rounds. Don't open with MCQs. Take the sensible reading, build it, then state the assumption in one line so I can veto it.
 - Commit hygiene. Batch freely. Atomicity, "commit as you build", and amend-don't-stack are all off.
-- Doc currency. Drift in README and the other docs is fine.
+- Doc currency. Drift in the docs is fine.
 
 Still on, because none of it is code quality:
 - Conventional Commit subjects. The husky `commit-msg` hook runs commitlint and will reject anything else, and `--no-verify` stays out of bounds.
@@ -85,7 +85,7 @@ Still on, because none of it is code quality:
 - No em-dashes anywhere you write. End the sentence at the clause and cut the trailer, do not swap in a comma or hyphen. A lone `—` as an empty-cell glyph in UI is fine.
 - No middots either, anywhere: not in prose, not in UI copy, not as a separator in code or in output. Use a word, a comma or a list.
 - Load-bearing info on a GitHub issue goes in the body (`gh issue edit`), never in comments. Fold corrections and dependency notes into the body.
-- Keep `README.md` current in the same PR when a change is reader-facing. Not for internal refactors or test tweaks.
+- `README.md` is protected. I write it by hand. Never edit, overwrite or regenerate it, even when a change is reader-facing. If it looks out of date, tell me.
 - List options with letters, not numbers.
 - Confirm risky actions (force-push, history rewrite, deleting an unmerged or shared branch, data loss) before executing.
 
