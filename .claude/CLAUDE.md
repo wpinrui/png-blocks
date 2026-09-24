@@ -59,6 +59,7 @@ Still on, because none of it is code quality:
 
 ## Working modes
 - Before building a feature, gather requirements first: multiple-choice questions, lettered options, covering scope and behaviour. Never invent a spec. Bugfixes are exempt when the bug is clearly defined. Once the spec is settled, if the build is medium or large (a diff of 250 lines or more), state what you are about to build and ask for permission to begin. For arguably small builds, do not waste time asking.
+- Permission to build is its own message, sent after the spec settles, and needs an explicit yes. Answers to requirements questions are never that permission, and never say they will be.
 - Every option needs a real reason to pick it. Do not provide trap options.
 - A trap I have not thought of is its own line, after the options, not a caveat hung on each one.
 - Use plan mode when a change spans several files or the approach is uncertain, and show me the plan before you build. Skip it when the diff fits in one sentence.
