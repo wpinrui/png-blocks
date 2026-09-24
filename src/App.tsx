@@ -303,6 +303,8 @@ export function App() {
       query.trim() ? searchToolboxXml(query, ws) : toolboxXml(showExtensions),
     );
     rerenderToolbox(ws);
+    // The category column changes width with extensions shown.
+    ws.resize();
     refreshEmpty(ws);
   }, [query, showExtensions]);
 
@@ -593,7 +595,7 @@ export function App() {
             Extensions
           </button>
         </div>
-        <div className="workspace-wrap">
+        <div className={`workspace-wrap${showExtensions ? " ext" : ""}`}>
           <div ref={divRef} className="workspace" />
           {empty && (
             <div
