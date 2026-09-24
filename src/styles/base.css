@@ -712,6 +712,185 @@ input::placeholder {
   background: var(--color-cat-pen);
 }
 
+/* ---------- Tutorial ---------- */
+
+.help-btn {
+  position: absolute;
+  left: 12px;
+  bottom: 14px;
+  z-index: 41;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: var(--shadow-popover);
+}
+
+.help-btn:hover {
+  color: var(--color-accent-strong);
+  border-color: var(--color-accent);
+}
+
+.help-btn.hidden {
+  visibility: hidden;
+}
+
+.workspace-wrap.ext .help-btn {
+  left: 28px;
+}
+
+/* Room below the last category so the ? button never covers it. */
+.workspace .blocklyToolbox {
+  padding-bottom: 64px;
+}
+
+.tutorial-blocker {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.tutorial {
+  position: fixed;
+  z-index: 62;
+  width: 340px;
+  padding: 16px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 14px;
+  box-shadow: var(--shadow-modal);
+  transition:
+    left 0.35s ease,
+    top 0.35s ease,
+    transform 0.35s ease,
+    opacity 0.35s ease;
+}
+
+.tutorial.folded {
+  transform: scale(0.1);
+  opacity: 0;
+}
+
+.tutorial-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -4px -8px 0 0;
+}
+
+.tutorial-step {
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  color: var(--color-accent-strong);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tutorial-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.tutorial-text {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-wrap: pretty;
+}
+
+.tutorial-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tutorial-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 61;
+  pointer-events: none;
+  opacity: 0.85;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+  filter: drop-shadow(0 6px 10px var(--color-scrim));
+}
+
+/* The demo pointer: a Scratch-yellow dot, deliberately unlike an OS cursor. */
+.fake-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 63;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+}
+
+.fake-cursor::before,
+.fake-cursor::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+
+.fake-cursor::after {
+  left: -12px;
+  top: -12px;
+  width: 24px;
+  height: 24px;
+  background: var(--color-cat-event);
+  border: 3px solid var(--color-surface);
+  box-shadow:
+    0 0 0 1px var(--color-cat-event-edge),
+    0 4px 10px var(--color-scrim);
+  transition: transform 0.15s ease;
+}
+
+.fake-cursor::before {
+  left: -22px;
+  top: -22px;
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--color-cat-event);
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.fake-cursor.pressed::after {
+  transform: scale(0.8);
+}
+
+.fake-cursor.pressed::before {
+  opacity: 0.7;
+  transform: scale(1);
+}
+
+.search.demo-focus {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-accent-ring);
+}
+
+.copy-main.demo-press {
+  background: var(--color-accent-active);
+}
+
 /* ---------- Toast ---------- */
 
 /* Drops in right under the Copy PNG button, where the eye already is. */

@@ -24,7 +24,7 @@ const STYLE_PROPS = [
 
 // Copy computed styles onto the clone so the SVG renders the same outside
 // the page's stylesheets.
-function inlineStyles(src: Element, dst: Element) {
+export function inlineStyles(src: Element, dst: Element) {
   const computed = getComputedStyle(src);
   const css = STYLE_PROPS.map(
     (p) => `${p}:${computed.getPropertyValue(p)}`,
