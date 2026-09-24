@@ -32,6 +32,15 @@
   --color-danger-soft: #fdf0f0;
   --color-success: #59c059;
   --color-warning: #ffab19;
+  --color-success-bg: #ebf8ec;
+  --color-success-border: #b9e3bd;
+  --color-success-text: #1e5e27;
+  --color-warning-bg: #fff6e3;
+  --color-warning-border: #f3d59a;
+  --color-warning-text: #7a4d00;
+  --color-error-bg: #fdeeee;
+  --color-error-border: #f2c0c3;
+  --color-error-text: #9b2229;
   --color-grid: #dddddd;
   --color-scrim: rgba(33, 41, 58, 0.32);
   --color-pointer: rgba(70, 76, 92, 0.42);

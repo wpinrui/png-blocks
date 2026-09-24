@@ -607,7 +607,7 @@ export function App() {
       showToast({
         tone: "success",
         title: "Copied to clipboard",
-        body: `${w} × ${h} px at ${formatScale(scale)}`,
+        body: `${w} × ${h} px at ${formatScale(scale)} size`,
       });
     },
   };
@@ -625,7 +625,7 @@ export function App() {
       showToast({
         tone: "success",
         title: "Copied to clipboard",
-        body: `${await pngSize(png)} at ${formatScale(scale)}`,
+        body: `${await pngSize(png)} at ${formatScale(scale)} size`,
       });
     } catch (e) {
       showToast({
@@ -1072,7 +1072,7 @@ export function App() {
       )}
 
       {toast && (
-        <div className="toast" role="status" aria-live="polite">
+        <div className={`toast ${toast.tone}`} role="status" aria-live="polite">
           <span className={`dot ${toast.tone}`} />
           <div className="toast-body">
             <strong>{toast.title}</strong>
