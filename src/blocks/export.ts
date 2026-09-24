@@ -72,39 +72,42 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-export async function workspacePng(
-  workspace: SB.WorkspaceSvg,
-  scale: number,
-): Promise<Blob> {
-  // Drop the selection outline without going through the focus manager,
-  // which rejects a null selection.
+// Drop the selection outline without going through the focus manager,
+// which rejects a null selection.
+function unselect() {
   const selected = SB.common.getSelected() as { unselect?: () => void } | null;
   selected?.unselect?.();
-  const canvas = workspace.getCanvas();
-  const box = canvas.getBBox();
-  if (box.width === 0 || box.height === 0) throw new Error("Nothing to copy");
+}
 
-  const clone = canvas.cloneNode(true) as SVGGElement;
-  inlineStyles(canvas, clone);
+// Clone `source` into a standalone SVG framing `box`. Styles are copied
+// now, so the caller can undo any temporary changes to the live DOM.
+function standaloneSvg(
+  workspace: SB.WorkspaceSvg,
+  source: SVGGElement,
+  box: DOMRect,
+  scale: number,
+) {
+  const clone = source.cloneNode(true) as SVGGElement;
+  inlineStyles(source, clone);
   clone.removeAttribute("transform");
-  await inlineImages(clone);
 
-  const pad = PAD;
-  const svgNs = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(svgNs, "svg");
-  const w = box.width + pad * 2;
-  const h = box.height + pad * 2;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const w = box.width + PAD * 2;
+  const h = box.height + PAD * 2;
   svg.setAttribute("width", String(w * scale));
   svg.setAttribute("height", String(h * scale));
-  svg.setAttribute(
-    "viewBox",
-    `${box.x - pad} ${box.y - pad} ${w} ${h}`,
-  );
+  svg.setAttribute("viewBox", `${box.x - PAD} ${box.y - PAD} ${w} ${h}`);
   // Filters such as the selection glow reference defs in the live SVG.
   const defs = workspace.getParentSvg().querySelector("defs");
   if (defs) svg.appendChild(defs.cloneNode(true));
   svg.appendChild(clone);
+  return { svg, clone, width: Math.ceil(w * scale), height: Math.ceil(h * scale) };
+}
 
+async function rasterise(
+  { svg, clone, width, height }: ReturnType<typeof standaloneSvg>,
+): Promise<Blob> {
+  await inlineImages(clone);
   const xml = new XMLSerializer().serializeToString(svg);
   const url = URL.createObjectURL(
     new Blob([xml], { type: "image/svg+xml;charset=utf-8" }),
@@ -112,9 +115,9 @@ export async function workspacePng(
   try {
     const img = await loadImage(url);
     const out = document.createElement("canvas");
-    out.width = Math.ceil(w * scale);
-    out.height = Math.ceil(h * scale);
-    out.getContext("2d")?.drawImage(img, 0, 0, out.width, out.height);
+    out.width = width;
+    out.height = height;
+    out.getContext("2d")?.drawImage(img, 0, 0, width, height);
     const trimmed = trim(out);
     return await new Promise<Blob>((resolve, reject) =>
       trimmed.toBlob(
@@ -125,6 +128,64 @@ export async function workspacePng(
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+export async function workspacePng(
+  workspace: SB.WorkspaceSvg,
+  scale: number,
+): Promise<Blob> {
+  unselect();
+  const canvas = workspace.getCanvas();
+  const box = canvas.getBBox();
+  if (box.width === 0 || box.height === 0) throw new Error("Nothing to copy");
+  return rasterise(standaloneSvg(workspace, canvas, box, scale));
+}
+
+// The blocks that go with `block` the way Delete counts them: the block and
+// everything nested in it, but not the blocks stacked below it.
+export function blocksWith(block: SB.Block): SB.Block[] {
+  const below = block.getNextBlock()?.getDescendants(false) ?? [];
+  return block
+    .getDescendants(false)
+    .filter((b) => !b.isShadow() && !below.includes(b));
+}
+
+export async function blockPng(block: SB.BlockSvg, scale: number): Promise<Blob> {
+  unselect();
+  const root = block.getSvgRoot();
+  // The next block's SVG is nested inside this one; hide it while measuring
+  // and cloning so only this block and its insides are drawn.
+  const next = block.getNextBlock() as SB.BlockSvg | null;
+  const nextRoot = next?.getSvgRoot();
+  const display = nextRoot?.style.display ?? "";
+  if (nextRoot) nextRoot.style.display = "none";
+  let standalone: ReturnType<typeof standaloneSvg>;
+  try {
+    standalone = standaloneSvg(block.workspace, root, root.getBBox(), scale);
+  } finally {
+    if (nextRoot) nextRoot.style.display = display;
+  }
+  return rasterise(standalone);
+}
+
+// Write a PNG that is still rendering. Chrome reports any render failure as
+// a generic DataError, so keep the real one to rethrow.
+async function writePng(png: Promise<Blob>): Promise<Blob> {
+  let failure: unknown;
+  const tracked = png.catch((e: unknown) => {
+    failure = e;
+    throw e;
+  });
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": tracked })]);
+  } catch (e) {
+    throw failure ?? e;
+  }
+  return tracked;
+}
+
+export function copyBlock(block: SB.BlockSvg, scale: number): Promise<Blob> {
+  return writePng(blockPng(block, scale));
 }
 
 export function isEmpty(workspace: SB.WorkspaceSvg): boolean {
@@ -148,23 +209,11 @@ export function estimateSize(
   ];
 }
 
-export async function copyWorkspace(
+export function copyWorkspace(
   workspace: SB.WorkspaceSvg,
   scale: number,
 ): Promise<Blob> {
-  // Chrome reports any render failure as a generic DataError, so keep the
-  // real one to rethrow.
-  let failure: unknown;
-  const png = workspacePng(workspace, scale).catch((e: unknown) => {
-    failure = e;
-    throw e;
-  });
-  try {
-    await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);
-  } catch (e) {
-    throw failure ?? e;
-  }
-  return png;
+  return writePng(workspacePng(workspace, scale));
 }
 
 export async function downloadWorkspace(
