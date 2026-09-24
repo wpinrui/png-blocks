@@ -321,8 +321,9 @@ function categoryXml(c: Category): string {
   return `<category ${attrs}>${c.items.join("")}</category>`;
 }
 
-export function toolboxXml(): string {
-  return `<xml style="display: none">${allCategories().map(categoryXml).join("")}</xml>`;
+export function toolboxXml(showExtensions: boolean): string {
+  const shown = showExtensions ? allCategories() : CORE;
+  return `<xml style="display: none">${shown.map(categoryXml).join("")}</xml>`;
 }
 
 // ---------- Search ----------

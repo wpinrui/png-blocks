@@ -65,6 +65,7 @@ export function App() {
   const [state, setState] = useState<TabState>(loadTabs);
   const [query, setQuery] = useState("");
   const [scale, setScale] = useState(1);
+  const [showExtensions, setShowExtensions] = useState(false);
   const [status, setStatus] = useState("");
   const divRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<SB.WorkspaceSvg | null>(null);
@@ -106,7 +107,7 @@ export function App() {
     if (!div) return;
     setupBlocks();
     const ws = SB.inject(div, {
-      toolbox: toolboxXml(),
+      toolbox: toolboxXml(false),
       media: MEDIA,
       theme: makeTheme(),
       zoom: { controls: true, wheel: true, startScale: 0.675 },
@@ -157,9 +158,13 @@ export function App() {
   useEffect(() => {
     const ws = wsRef.current;
     if (!ws) return;
-    ws.updateToolbox(query.trim() ? searchToolboxXml(query, ws) : toolboxXml());
+    ws.updateToolbox(
+      query.trim()
+        ? searchToolboxXml(query, ws)
+        : toolboxXml(showExtensions),
+    );
     rerenderToolbox(ws);
-  }, [query]);
+  }, [query, showExtensions]);
 
   function newTab() {
     const s = snapshot();
@@ -277,6 +282,13 @@ export function App() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        <button
+          type="button"
+          aria-expanded={showExtensions}
+          onClick={() => setShowExtensions(!showExtensions)}
+        >
+          {showExtensions ? "▾" : "▸"} Extensions
+        </button>
         <label>
           Size {scale.toFixed(2)}x{" "}
           <input
