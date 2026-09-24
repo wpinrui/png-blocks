@@ -149,12 +149,12 @@ export function App() {
           style={{ width: "100%" }}
         />
         <label style={{ display: "block", marginTop: 8 }}>
-          Size {scale}x{" "}
+          Size {scale.toFixed(2)}x{" "}
           <input
             type="range"
-            min={0.5}
-            max={6}
-            step={0.25}
+            min={0.25}
+            max={4}
+            step={0.05}
             value={scale}
             onChange={(e) => setScale(Number(e.target.value))}
           />
