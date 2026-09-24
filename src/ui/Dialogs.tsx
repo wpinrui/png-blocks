@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { renderSvg } from "../render";
 import { type DialogRequest, subscribeDialog } from "./dialog";
@@ -98,7 +99,7 @@ export function Dialogs() {
             aria-label="Close"
             onClick={cancel}
           >
-            ×
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
         <div className="modal-body">

@@ -174,8 +174,8 @@ input::placeholder {
   background: var(--color-selected);
 }
 
-.icon-btn img {
-  opacity: 0.55;
+.tab .icon-btn svg {
+  display: block;
 }
 
 /* Centred on the 44px active tab, which sits on the header's bottom edge. */
@@ -537,9 +537,26 @@ input::placeholder {
   pointer-events: none;
 }
 
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-faint);
+  pointer-events: none;
+}
+
 .search {
   flex: 1;
   min-width: 0;
+  padding-left: 32px !important;
   height: 34px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -928,6 +945,10 @@ input::placeholder {
 
 .toast .icon-btn:hover {
   background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.toast-icon {
+  flex-shrink: 0;
 }
 
 .toast-body {

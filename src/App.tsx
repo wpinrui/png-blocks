@@ -1,3 +1,15 @@
+import {
+  ChevronDown,
+  Clipboard,
+  ClipboardCheck,
+  ClipboardX,
+  Download,
+  FileX,
+  type LucideIcon,
+  Plus,
+  Search,
+  X,
+} from "lucide-react";
 import * as SB from "scratch-blocks";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import {
@@ -25,6 +37,7 @@ type Overlay =
 
 type Toast = {
   tone: "success" | "warning" | "error";
+  icon: LucideIcon;
   title: string;
   body: string;
   download?: boolean;
@@ -552,6 +565,7 @@ export function App() {
 
   const emptyToast: Toast = {
     tone: "warning",
+    icon: Clipboard,
     title: "Nothing to copy",
     body: "This tab has no blocks yet. Drag some in from the left.",
   };
@@ -606,6 +620,7 @@ export function App() {
       const [w, h] = estimateSize(ws, scale);
       showToast({
         tone: "success",
+        icon: ClipboardCheck,
         title: "Copied to clipboard",
         body: `${w} × ${h} px at ${formatScale(scale)} size`,
       });
@@ -624,12 +639,14 @@ export function App() {
       const png = await copyWorkspace(ws, scale);
       showToast({
         tone: "success",
+        icon: ClipboardCheck,
         title: "Copied to clipboard",
         body: `${await pngSize(png)} at ${formatScale(scale)} size`,
       });
     } catch (e) {
       showToast({
         tone: "error",
+        icon: ClipboardX,
         title: "Couldn't copy",
         body: `${e instanceof Error ? e.message : String(e)}. You can download the PNG instead.`,
         download: true,
@@ -650,12 +667,14 @@ export function App() {
       const png = await downloadWorkspace(ws, scale, name);
       showToast({
         tone: "success",
+        icon: Download,
         title: "Downloaded",
         body: `${name}, ${await pngSize(png)}`,
       });
     } catch (e) {
       showToast({
         tone: "error",
+        icon: FileX,
         title: "Couldn't download",
         body: e instanceof Error ? e.message : String(e),
       });
@@ -729,12 +748,7 @@ export function App() {
                       openMenu(e.currentTarget.closest(".tab") ?? e.currentTarget);
                     }}
                   >
-                    <img
-                      src={`${MEDIA}dropdown-arrow-dark.svg`}
-                      width="10"
-                      height="7"
-                      alt=""
-                    />
+                    <ChevronDown size={16} aria-hidden="true" />
                   </button>
                 )}
                 <button
@@ -751,7 +765,7 @@ export function App() {
                   }}
                   onDoubleClick={(e) => e.stopPropagation()}
                 >
-                  ×
+                  <X size={16} aria-hidden="true" />
                 </button>
               </div>
             );
@@ -763,7 +777,7 @@ export function App() {
             title="New tab"
             onClick={newTab}
           >
-            +
+            <Plus size={18} aria-hidden="true" />
           </button>
         </nav>
 
@@ -785,7 +799,7 @@ export function App() {
               aria-expanded={overlay?.kind === "copy"}
               onClick={(e) => toggleCopyMenu(e.currentTarget.parentElement ?? e.currentTarget)}
             >
-              <img src={`${MEDIA}dropdown-arrow.svg`} width="11" height="8" alt="" />
+              <ChevronDown size={18} aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -795,14 +809,17 @@ export function App() {
         <div className={`workspace-wrap${showExtensions ? " ext" : ""}`}>
           <div ref={divRef} className="workspace" />
           <div className="toolbar">
-            <input
-              type="search"
-              className="search"
-              placeholder="Search blocks"
-              aria-label="Search blocks"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+            <div className="search-wrap">
+              <Search className="search-icon" size={16} aria-hidden="true" />
+              <input
+                type="search"
+                className="search"
+                placeholder="Search blocks"
+                aria-label="Search blocks"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
             <button
               type="button"
               className="switch-btn"
@@ -1073,7 +1090,7 @@ export function App() {
 
       {toast && (
         <div className={`toast ${toast.tone}`} role="status" aria-live="polite">
-          <span className={`dot ${toast.tone}`} />
+          <toast.icon className="toast-icon" size={20} aria-hidden="true" />
           <div className="toast-body">
             <strong>{toast.title}</strong>
             <span>{toast.body}</span>
@@ -1093,7 +1110,7 @@ export function App() {
             aria-label="Dismiss"
             onClick={() => setToast(null)}
           >
-            ×
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
       )}
