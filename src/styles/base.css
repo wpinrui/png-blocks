@@ -500,6 +500,24 @@ input::placeholder {
   border-bottom: 1px solid var(--color-border-soft);
 }
 
+/* Sits centred just above the zoom buttons. */
+.zoom-level {
+  position: absolute;
+  z-index: 41;
+  transform: translate(-50%, calc(-100% - 8px));
+  min-width: 44px;
+  padding: 2px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  pointer-events: none;
+}
+
 /* The sidebar's right edge, from the header down past the palette. */
 .sidebar-edge {
   position: absolute;
