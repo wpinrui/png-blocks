@@ -1,154 +1,268 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  type BlockDef,
-  CATALOG,
-  CATEGORY_NAMES,
-  defaultValues,
-  toCode,
-} from "./catalog";
-import { copyPng, renderSvg } from "./render";
+import * as SB from "scratch-blocks";
+import { useEffect, useRef, useState } from "react";
+import { copyWorkspace } from "./blocks/export";
+import { MEDIA, makeTheme, setupBlocks } from "./blocks/setup";
+import { searchToolboxXml, toolboxXml } from "./blocks/toolbox";
 
-function BlockSvg({ code, scale }: { code: string; scale: number }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    try {
-      el.replaceChildren(renderSvg(code, scale));
-    } catch (e) {
-      el.textContent = `Render error: ${String(e)}`;
+type Tab = { id: string; name: string; xml: string };
+type TabState = { tabs: Tab[]; active: string };
+
+const STORAGE_KEY = "sbp-tabs";
+
+const newId = () => Math.random().toString(36).slice(2, 10);
+
+function loadTabs(): TabState {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as TabState;
+      if (parsed.tabs.length > 0) return parsed;
     }
-  }, [code, scale]);
-  return <span ref={ref} style={{ display: "inline-block" }} />;
+  } catch {
+    // Fall through to a fresh tab.
+  }
+  const id = newId();
+  return { tabs: [{ id, name: "Tab 1", xml: "" }], active: id };
 }
 
-function InputField({
-  block,
-  index,
-  value,
-  onChange,
-}: {
-  block: BlockDef;
-  index: number;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const input = block.inputs[index];
-  if (!input) return null;
-  const listId = `opts-${block.key}-${index}`;
-  if (input.kind === "boolean") return null;
-  return (
-    <label style={{ display: "block", marginBottom: 6 }}>
-      {input.kind === "color" ? (
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : (
-        <>
-          <input
-            type="text"
-            inputMode={input.kind === "number" ? "decimal" : "text"}
-            value={value}
-            list={input.options ? listId : undefined}
-            onChange={(e) => onChange(e.target.value)}
-            style={{ width: "100%" }}
-          />
-          {input.options && (
-            <datalist id={listId}>
-              {input.options.map((o) => (
-                <option key={o} value={o} />
-              ))}
-            </datalist>
-          )}
-        </>
-      )}
-    </label>
-  );
+function saveTabs(state: TabState) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Storage full or blocked: keep working in memory.
+  }
 }
 
-function matches(block: BlockDef, query: string): boolean {
-  const hay =
-    `${block.label} ${CATEGORY_NAMES[block.category] ?? ""}`.toLowerCase();
-  return query
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean)
-    .every((word) => hay.includes(word));
+function ensureDefaults(ws: SB.WorkspaceSvg) {
+  const map = ws.getVariableMap();
+  if (map.getVariablesOfType("").length === 0) {
+    map.createVariable("my variable", "");
+  }
+  if (map.getVariablesOfType("broadcast_msg").length === 0) {
+    map.createVariable("message1", "broadcast_msg");
+  }
 }
+
+function loadXml(ws: SB.WorkspaceSvg, xml: string) {
+  if (xml) {
+    SB.clearWorkspaceAndLoadFromXml(SB.utils.xml.textToDom(xml), ws);
+  } else {
+    ws.clear();
+  }
+  ensureDefaults(ws);
+  ws.refreshToolboxSelection();
+}
+
+const workspaceXml = (ws: SB.WorkspaceSvg) =>
+  SB.Xml.domToText(SB.Xml.workspaceToDom(ws));
 
 export function App() {
+  const [state, setState] = useState<TabState>(loadTabs);
   const [query, setQuery] = useState("");
   const [scale, setScale] = useState(1);
-  const [values, setValues] = useState<Record<string, string[]>>({});
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [codeOverride, setCodeOverride] = useState<string | null>(null);
   const [status, setStatus] = useState("");
+  const divRef = useRef<HTMLDivElement>(null);
+  const wsRef = useRef<SB.WorkspaceSvg | null>(null);
+  const stateRef = useRef(state);
+  const loadingRef = useRef(false);
 
-  const valuesFor = (b: BlockDef) => values[b.key] ?? defaultValues(b);
-  const codeFor = (b: BlockDef) => toCode(b, valuesFor(b));
+  const commit = (next: TabState) => {
+    stateRef.current = next;
+    setState(next);
+    saveTabs(next);
+  };
 
-  const selected = CATALOG.find((b) => b.key === selectedKey) ?? null;
-  const selectedCode = selected
-    ? (codeOverride ?? codeFor(selected))
-    : (codeOverride ?? "");
+  // Write the live workspace into the active tab.
+  const snapshot = (): TabState => {
+    const ws = wsRef.current;
+    const s = stateRef.current;
+    if (!ws) return s;
+    const xml = workspaceXml(ws);
+    return {
+      ...s,
+      tabs: s.tabs.map((t) => (t.id === s.active ? { ...t, xml } : t)),
+    };
+  };
 
-  const groups = useMemo(() => {
-    const out: { category: string; blocks: BlockDef[] }[] = [];
-    for (const b of CATALOG) {
-      if (!matches(b, query)) continue;
-      const last = out[out.length - 1];
-      if (last?.category === b.category) last.blocks.push(b);
-      else out.push({ category: b.category, blocks: [b] });
+  const switchTo = (next: TabState) => {
+    const ws = wsRef.current;
+    commit(next);
+    const tab = next.tabs.find((t) => t.id === next.active);
+    if (ws && tab) {
+      loadingRef.current = true;
+      loadXml(ws, tab.xml);
+      loadingRef.current = false;
     }
-    return out;
+  };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: inject once
+  useEffect(() => {
+    const div = divRef.current;
+    if (!div) return;
+    setupBlocks();
+    const ws = SB.inject(div, {
+      toolbox: toolboxXml(),
+      media: MEDIA,
+      theme: makeTheme(),
+      zoom: { controls: true, wheel: true, startScale: 0.675 },
+      grid: { spacing: 40, length: 2, colour: "#ddd" },
+      comments: true,
+      sounds: false,
+      trashcan: false,
+      move: { scrollbars: true, drag: true, wheel: true },
+    });
+    ws.registerToolboxCategoryCallback(
+      "VARIABLE",
+      SB.ScratchVariables.getVariablesCategory,
+    );
+    ws.registerToolboxCategoryCallback(
+      "PROCEDURE",
+      SB.ScratchProcedures.getProceduresCategory,
+    );
+    wsRef.current = ws;
+
+    const s = stateRef.current;
+    loadingRef.current = true;
+    loadXml(ws, s.tabs.find((t) => t.id === s.active)?.xml ?? "");
+    loadingRef.current = false;
+
+    let timer: number | undefined;
+    ws.addChangeListener((e: SB.Events.Abstract) => {
+      if (e.isUiEvent || loadingRef.current) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => commit(snapshot()), 300);
+    });
+
+    return () => {
+      window.clearTimeout(timer);
+      ws.dispose();
+      wsRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const ws = wsRef.current;
+    if (!ws) return;
+    ws.updateToolbox(query.trim() ? searchToolboxXml(query, ws) : toolboxXml());
   }, [query]);
 
-  async function copy(code: string, name: string) {
+  function newTab() {
+    const s = snapshot();
+    const id = newId();
+    switchTo({
+      tabs: [...s.tabs, { id, name: `Tab ${s.tabs.length + 1}`, xml: "" }],
+      active: id,
+    });
+  }
+
+  function duplicateTab() {
+    const s = snapshot();
+    const current = s.tabs.find((t) => t.id === s.active);
+    if (!current) return;
+    const id = newId();
+    const index = s.tabs.indexOf(current);
+    const tabs = [...s.tabs];
+    tabs.splice(index + 1, 0, { ...current, id, name: `${current.name} copy` });
+    switchTo({ tabs, active: id });
+  }
+
+  function renameTab(id: string) {
+    const s = snapshot();
+    const tab = s.tabs.find((t) => t.id === id);
+    const name = window.prompt("Tab name", tab?.name ?? "");
+    if (!name?.trim()) return;
+    commit({
+      ...s,
+      tabs: s.tabs.map((t) => (t.id === id ? { ...t, name: name.trim() } : t)),
+    });
+  }
+
+  function closeTab(id: string) {
+    const s = snapshot();
+    const tab = s.tabs.find((t) => t.id === id);
+    if (!tab || !window.confirm(`Close "${tab.name}"?`)) return;
+    const index = s.tabs.indexOf(tab);
+    let tabs = s.tabs.filter((t) => t.id !== id);
+    if (tabs.length === 0) tabs = [{ id: newId(), name: "Tab 1", xml: "" }];
+    const active =
+      s.active === id
+        ? (tabs[Math.min(index, tabs.length - 1)]?.id ?? "")
+        : s.active;
+    switchTo({ tabs, active });
+  }
+
+  function selectTab(id: string) {
+    if (id === stateRef.current.active) return;
+    switchTo({ ...snapshot(), active: id });
+  }
+
+  async function copy() {
+    const ws = wsRef.current;
+    if (!ws) return;
     try {
-      await copyPng(code, scale);
-      setStatus(`Copied ${name}`);
+      await copyWorkspace(ws, scale);
+      setStatus("Copied");
     } catch (e) {
       setStatus(`Copy failed: ${String(e)}`);
     }
   }
 
-  function select(b: BlockDef) {
-    setSelectedKey(b.key);
-    setCodeOverride(null);
-    void copy(codeFor(b), b.label);
-  }
-
-  function setValue(b: BlockDef, i: number, v: string) {
-    const next = [...valuesFor(b)];
-    next[i] = v;
-    setValues({ ...values, [b.key]: next });
-    setCodeOverride(null);
-  }
-
   return (
-    <div style={{ display: "flex", gap: 16, padding: 16, flexWrap: "wrap" }}>
-      <aside
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <div
         style={{
-          flex: "0 0 360px",
-          maxWidth: "100%",
-          position: "sticky",
-          top: 16,
-          alignSelf: "flex-start",
-          maxHeight: "calc(100vh - 32px)",
-          overflowY: "auto",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 8,
+          alignItems: "center",
+          padding: 8,
         }}
       >
-        <h1 style={{ marginTop: 0 }}>Scratch block PNG</h1>
+        {state.tabs.map((t) => (
+          <span key={t.id} style={{ display: "inline-flex" }}>
+            <button
+              type="button"
+              onClick={() => selectTab(t.id)}
+              onDoubleClick={() => renameTab(t.id)}
+              style={{ fontWeight: t.id === state.active ? "bold" : "normal" }}
+            >
+              {t.name}
+            </button>
+            <button
+              type="button"
+              aria-label={`Close ${t.name}`}
+              onClick={() => closeTab(t.id)}
+            >
+              x
+            </button>
+          </span>
+        ))}
+        <button type="button" onClick={newTab}>
+          New tab
+        </button>
+        <button type="button" onClick={duplicateTab}>
+          Duplicate
+        </button>
+        <button type="button" onClick={() => renameTab(state.active)}>
+          Rename
+        </button>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          alignItems: "center",
+          padding: "0 8px 8px",
+        }}
+      >
         <input
           type="search"
           placeholder="Search blocks"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          style={{ width: "100%" }}
         />
-        <label style={{ display: "block", marginTop: 8 }}>
+        <label>
           Size {scale.toFixed(2)}x{" "}
           <input
             type="range"
@@ -159,101 +273,44 @@ export function App() {
             onChange={(e) => setScale(Number(e.target.value))}
           />
         </label>
-        <p aria-live="polite">{status}</p>
-
-        {selected &&
-          selected.inputs.map((_, i) => (
-            <InputField
-              // biome-ignore lint/suspicious/noArrayIndexKey: inputs are positional
-              key={i}
-              block={selected}
-              index={i}
-              value={valuesFor(selected)[i] ?? ""}
-              onChange={(v) => setValue(selected, i, v)}
-            />
-          ))}
-        {(selected || codeOverride) && (
-          <>
-            <div style={{ margin: "8px 0", overflowX: "auto" }}>
-              <BlockSvg code={selectedCode} scale={1} />
-            </div>
-            <button
-              type="button"
-              onClick={() => void copy(selectedCode, selected?.label ?? "")}
-            >
-              Copy PNG
-            </button>
-          </>
-        )}
-        <label style={{ display: "block", marginTop: 8 }}>
-          Code
-          <textarea
-            value={selectedCode}
-            onChange={(e) => setCodeOverride(e.target.value)}
-            rows={6}
-            style={{ width: "100%", fontFamily: "monospace" }}
-          />
-        </label>
-
-        <footer style={{ marginTop: 16 }}>
-          <p>
-            Scratch is developed by the Lifelong Kindergarten Group at the MIT
-            Media Lab. See{" "}
-            <a href="https://scratch.mit.edu" target="_blank" rel="noreferrer">
-              scratch.mit.edu
-            </a>
-            . Block images:{" "}
-            <a
-              href="https://creativecommons.org/licenses/by-sa/2.0/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              CC BY-SA 2.0
-            </a>
-            .
-          </p>
-          <p>
-            Rendered with{" "}
-            <a
-              href="https://github.com/scratchblocks/scratchblocks"
-              target="_blank"
-              rel="noreferrer"
-            >
-              scratchblocks
-            </a>{" "}
-            (MIT). Not affiliated with the Scratch Foundation or MIT.
-          </p>
-        </footer>
-      </aside>
-
-      <main style={{ flex: "1 1 400px", minWidth: 0 }}>
-        {groups.length === 0 && <p>No matches</p>}
-        {groups.map((g) => (
-          <section key={g.category}>
-            <h2>{CATEGORY_NAMES[g.category] ?? g.category}</h2>
-            {g.blocks.map((b) => (
-              <div key={b.key} style={{ marginBottom: 6 }}>
-                <button
-                  type="button"
-                  title={b.label}
-                  onClick={() => select(b)}
-                  style={{
-                    background: "none",
-                    border:
-                      b.key === selectedKey
-                        ? "2px solid currentColor"
-                        : "2px solid transparent",
-                    padding: 2,
-                    cursor: "pointer",
-                  }}
-                >
-                  <BlockSvg code={codeFor(b)} scale={0.75} />
-                </button>
-              </div>
-            ))}
-          </section>
-        ))}
-      </main>
+        <button type="button" onClick={() => void copy()}>
+          Copy PNG
+        </button>
+        <span aria-live="polite">{status}</span>
+      </div>
+      <div ref={divRef} style={{ flex: 1, minHeight: 0 }} />
+      <footer style={{ padding: "4px 8px", fontSize: 12 }}>
+        Scratch is developed by the Lifelong Kindergarten Group at the MIT Media
+        Lab. See{" "}
+        <a href="https://scratch.mit.edu" target="_blank" rel="noreferrer">
+          scratch.mit.edu
+        </a>
+        . Block images:{" "}
+        <a
+          href="https://creativecommons.org/licenses/by-sa/2.0/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          CC BY-SA 2.0
+        </a>
+        . Built with{" "}
+        <a
+          href="https://github.com/scratchfoundation/scratch-blocks"
+          target="_blank"
+          rel="noreferrer"
+        >
+          scratch-blocks
+        </a>{" "}
+        (Apache-2.0) and{" "}
+        <a
+          href="https://github.com/scratchblocks/scratchblocks"
+          target="_blank"
+          rel="noreferrer"
+        >
+          scratchblocks
+        </a>{" "}
+        (MIT). Not affiliated with the Scratch Foundation or MIT.
+      </footer>
     </div>
   );
 }

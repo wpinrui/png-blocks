@@ -25,6 +25,10 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
+## scratch-blocks
+
+This project depends on [scratch-blocks](https://github.com/scratchfoundation/scratch-blocks) (Copyright Massachusetts Institute of Technology and Google LLC, Apache License 2.0) and serves a copy of its `media/` folder from `public/scratch-blocks-media/`. The Apache License 2.0 text is at https://www.apache.org/licenses/LICENSE-2.0.
+
 ## Scratch
 
 Scratch is developed by the Lifelong Kindergarten Group at the MIT Media Lab. See https://scratch.mit.edu.
