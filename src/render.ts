@@ -14,17 +14,8 @@ export function renderSvg(code: string, scale: number): SVGSVGElement {
   return view(code, scale).svg;
 }
 
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Could not rasterise block SVG"));
-    img.src = src;
-  });
-}
-
 // Crop the canvas to the bounding box of its non-transparent pixels.
-function trim(canvas: HTMLCanvasElement): HTMLCanvasElement {
+export function trim(canvas: HTMLCanvasElement): HTMLCanvasElement {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("No 2D context");
   const { width, height } = canvas;
@@ -49,34 +40,4 @@ function trim(canvas: HTMLCanvasElement): HTMLCanvasElement {
   out.height = bottom - top + 1;
   out.getContext("2d")?.drawImage(canvas, -left, -top);
   return out;
-}
-
-export async function renderPng(code: string, scale: number): Promise<Blob> {
-  const { v } = view(code, scale);
-  const xml = v.exportSVGString();
-  const url = URL.createObjectURL(
-    new Blob([xml], { type: "image/svg+xml;charset=utf-8" }),
-  );
-  try {
-    const img = await loadImage(url);
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.ceil(v.width * scale));
-    canvas.height = Math.max(1, Math.ceil(v.height * scale));
-    canvas.getContext("2d")?.drawImage(img, 0, 0);
-    const trimmed = trim(canvas);
-    return await new Promise<Blob>((resolve, reject) =>
-      trimmed.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error("PNG encode failed"))),
-        "image/png",
-      ),
-    );
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-
-export async function copyPng(code: string, scale: number): Promise<void> {
-  await navigator.clipboard.write([
-    new ClipboardItem({ "image/png": renderPng(code, scale) }),
-  ]);
 }

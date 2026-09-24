@@ -16,6 +16,7 @@
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "scratch-blocks": "2.1.19",
     "scratchblocks": "3.7.1"
   },
   "devDependencies": {
