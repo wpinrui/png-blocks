@@ -51,6 +51,11 @@ Still on, because none of it is code quality:
 - A failing review under `-rm` is not a stop. Fix and re-review until it passes.
 - After merge: pull `main`.
 
+## Deploy
+- Netlify publishes https://pngblocks.netlify.app from the `deploy` branch. Merging to `main` does not deploy.
+- Deploy only when I say "deploy". Then: `yarn build` on `main` must pass, fast-forward with `git push origin origin/main:deploy`, tag that commit `v<package.json version>`, push the tag, and run `gh release create v<version> --generate-notes`.
+- `deploy` only ever fast-forwards to a `main` commit. Never commit to it, never force-push it. It is exempt from the `<type>/<kebab-summary>` naming rule.
+
 ## Tasks & questions
 - "Do X" is a task. A question is a question, "can we do X" included: that one asks whether X is feasible. Put `Task:` in front to make a question a task.
 - Exception: when a question points at an obvious fix, make the fix. No feasibility answer, no waiting for `Task:`.
