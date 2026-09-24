@@ -1,0 +1,18 @@
+:root {
+  color-scheme: dark;
+
+  /* Semantic color tokens (dark theme). The ONLY file allowed to hold raw hex;
+     everywhere else references these via var(). */
+  --color-bg: #0d1117;
+  --color-surface: #161b22;
+  --color-surface-raised: #21262d;
+  --color-border: #30363d;
+  --color-text: #e6edf3;
+  --color-text-muted: #9ba7b4;
+  --color-accent: #4493f8;
+
+  /* Typography: 16px base, rem-based scale, 14px (0.875rem) floor for fine print. */
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size-base: 1rem;
+  --font-size-caption: 0.875rem;
+}
