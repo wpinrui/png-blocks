@@ -1,20 +1,22 @@
 # <img src="docs/images/logo.png" width="44" align="middle" alt=""> PNG blocks!
 
-Clean pictures of Scratch code, ready for your slides and worksheets.
+Create screenshots of Scratch blocks and programs for your slides and worksheets.
 
-Snap Scratch 3 blocks together exactly as you would in Scratch, then copy them to your clipboard as a transparent PNG trimmed to the blocks. Paste straight into Google Slides, PowerPoint, Word or Docs. No screenshots, no cropping, no stray backgrounds.
+PNG blocks! allows you to snap blocks together exactly as you would in Scratch, then copy them to your clipboard as a transparent PNG trimmed to the blocks. You can adjust the size before you copy, and you can paste into another application without the need to crop or resize.
+
+**[Open PNG blocks!](https://pngblocks.netlify.app)** It runs directly in your browser.
 
 ![The PNG blocks! window: a Scratch script on the canvas with the block palette on the left](docs/images/window.png)
 
-## What you get
+## How to use PNG blocks!?
 
-Build a script, press **Copy PNG**, and this lands on your clipboard:
+Build a script, press **Copy PNG**, and this image will be copied to your clipboard:
 
 <img src="docs/images/example.png" width="266" alt="An exported PNG of a Scratch script with a transparent background">
 
-The background is transparent and the edges are trimmed tight to the blocks, so the picture sits cleanly on any slide colour.
+The background is transparent and the edges are trimmed tight to the blocks, so the picture sits cleanly on any slide colour or worksheet.
 
-## Size it for the job
+## Adjust the image size
 
 Open the menu next to **Copy PNG** to set the size from 0.25x to 4x. The menu shows the exact pixel size before you copy. Go small for an inline worksheet snippet, or large for a projector. Prefer a file? **Download PNG** saves it, named after your tab.
 
@@ -34,24 +36,9 @@ Right-click any block and choose **Copy Block to Clipboard** to grab that block 
 - **Edit anything.** Type into inputs, pick dropdown values, add comments, and define your own blocks.
 - **Tabs.** Keep one tab per lesson or worksheet. Rename, duplicate, clear or close them from the tab menu. Your tabs are saved in your browser, so they are still there next time.
 - **Dark mode.** Switch with the moon button in the top bar. Exported PNGs look the same in either mode.
-- **Tutorial.** A short guided tour plays on your first visit. Replay it any time with the graduation cap button.
+- **Tutorial.** A short guided tour plays on your first visit. Replay it any time with the Tutorial button in the lower left.
 
 ![Dark mode with the Pen extension open](docs/images/dark.png)
-
-## Running PNG blocks!
-
-PNG blocks! runs in your browser. To start it on your own computer, install [Node.js](https://nodejs.org) and [Yarn](https://classic.yarnpkg.com), then run:
-
-```
-git clone https://github.com/wpinrui/png-blocks.git
-cd png-blocks
-yarn
-yarn dev
-```
-
-Open the address it prints, usually http://localhost:5173.
-
-To host it yourself, run `yarn build` and upload the `dist/` folder to any static web host.
 
 ## Crediting Scratch
 
