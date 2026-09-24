@@ -767,7 +767,7 @@ input::placeholder {
   opacity: 0;
 }
 
-.tutorial.closing {
+.tutorial.slow {
   transition-duration: 1.05s;
 }
 

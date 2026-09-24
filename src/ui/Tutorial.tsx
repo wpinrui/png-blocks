@@ -37,7 +37,8 @@ const STEPS = [
 ];
 
 const QUERY = "repeat until";
-// How long the card takes to fold into the ? button; matches .tutorial.closing.
+// How long the card takes to fold into, or grow out of, the ? button;
+// matches .tutorial.slow.
 const COLLAPSE_MS = 1050;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -130,6 +131,7 @@ export function Tutorial({
     "opening",
   );
   const [pos, setPos] = useState<Point>({ x: 0, y: 0 });
+  const [expanding, setExpanding] = useState(true);
   const [cursor, setCursor] = useState<Cursor>({
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
@@ -173,18 +175,26 @@ export function Tutorial({
     });
   };
 
-  // Open: start folded into the ? button, then grow to the middle.
+  // Open: start folded into the ? button, then grow to the middle at the
+  // same pace the card later folds back.
   // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount
   useLayoutEffect(() => {
     hostRef.current.begin();
     setPos(collapsedAt());
-    const id = requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
+    let inner = 0;
+    let timer = 0;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => {
         setPhase("open");
         center();
-      }),
-    );
-    return () => cancelAnimationFrame(id);
+        timer = window.setTimeout(() => setExpanding(false), COLLAPSE_MS);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(outer);
+      cancelAnimationFrame(inner);
+      window.clearTimeout(timer);
+    };
   }, []);
 
   // Run the current step's demo on a loop until the step changes.
@@ -384,7 +394,7 @@ export function Tutorial({
       {ghost && <GhostView ghost={ghost} />}
       <div
         ref={cardRef}
-        className={`tutorial${phase === "open" ? "" : " folded"}${phase === "closing" ? " closing" : ""}`}
+        className={`tutorial${phase === "open" ? "" : " folded"}${phase === "closing" || expanding ? " slow" : ""}`}
         role="dialog"
         aria-label="Tutorial"
         style={{ left: pos.x, top: pos.y }}
