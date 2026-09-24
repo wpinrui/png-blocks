@@ -9,6 +9,7 @@ import {
 import { MEDIA, makeTheme, setupBlocks } from "./blocks/setup";
 import { searchToolboxXml, toolboxXml } from "./blocks/toolbox";
 import { Dialogs } from "./ui/Dialogs";
+import { TUTORIAL_KEY, Tutorial, type TutorialHost } from "./ui/Tutorial";
 
 type Tab = { id: string; name: string; xml: string };
 type TabState = { tabs: Tab[]; active: string };
@@ -62,6 +63,14 @@ function saveTabs(state: TabState) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
     // Storage full or blocked: keep working in memory.
+  }
+}
+
+function tutorialDismissed(): boolean {
+  try {
+    return localStorage.getItem(TUTORIAL_KEY) === "1";
+  } catch {
+    return false;
   }
 }
 
@@ -258,6 +267,12 @@ export function App() {
   const [size, setSize] = useState<[number, number]>([0, 0]);
   const [zoom, setZoom] = useState(1);
   const [zoomAt, setZoomAt] = useState<{ x: number; y: number } | null>(null);
+  const [ready, setReady] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(() => !tutorialDismissed());
+  const helpRef = useRef<HTMLButtonElement>(null);
+  // While the tutorial runs, the user's tab is parked here and nothing the
+  // tutorial does to the workspace is saved.
+  const tutorialRef = useRef<{ xml: string; query: string } | null>(null);
   const divRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<SB.WorkspaceSvg | null>(null);
   const stateRef = useRef(state);
@@ -318,7 +333,8 @@ export function App() {
   const snapshot = (): TabState => {
     const ws = wsRef.current;
     const s = stateRef.current;
-    if (!ws) return s;
+    // The workspace holds the tutorial's blocks, not the tab's.
+    if (!ws || tutorialRef.current) return s;
     const xml = workspaceXml(ws);
     return {
       ...s,
@@ -375,6 +391,7 @@ export function App() {
       SB.ScratchProcedures.getProceduresCategory,
     );
     wsRef.current = ws;
+    setReady(true);
     linearZoom(ws);
     offsetPalette(
       ws,
@@ -405,6 +422,7 @@ export function App() {
         toolboxTimer = window.setTimeout(() => rerenderToolbox(ws), 100);
       }
       window.clearTimeout(timer);
+      if (tutorialRef.current) return;
       timer = window.setTimeout(() => commit(snapshot()), 300);
     });
 
@@ -536,6 +554,51 @@ export function App() {
     tone: "warning",
     title: "Nothing to copy",
     body: "This tab has no blocks yet. Drag some in from the left.",
+  };
+
+  const loadInto = (xml: string) => {
+    const ws = wsRef.current;
+    if (!ws) return;
+    loadingRef.current = true;
+    loadXml(ws, xml);
+    loadingRef.current = false;
+    refreshEmpty(ws);
+  };
+
+  const tutorialHost: TutorialHost = {
+    ws: () => wsRef.current,
+    canvasRect: () => {
+      const r = divRef.current?.getBoundingClientRect();
+      if (!r) return null;
+      return new DOMRect(
+        r.left + paletteWidth,
+        r.top,
+        r.width - paletteWidth,
+        r.height,
+      );
+    },
+    helpRect: () => helpRef.current?.getBoundingClientRect() ?? null,
+    begin: () => {
+      if (tutorialRef.current) return;
+      const s = snapshot();
+      commit(s);
+      setOverlay(null);
+      tutorialRef.current = {
+        xml: s.tabs.find((t) => t.id === s.active)?.xml ?? "",
+        query,
+      };
+    },
+    end: () => {
+      const saved = tutorialRef.current;
+      if (!saved) return;
+      loadInto(saved.xml);
+      setQuery(saved.query);
+      wsRef.current?.clearUndo();
+      tutorialRef.current = null;
+    },
+    load: loadInto,
+    setQuery,
+    copy,
   };
 
   async function copy() {
@@ -741,6 +804,16 @@ export function App() {
             </button>
           </div>
           <div className="sidebar-edge" />
+          <button
+            ref={helpRef}
+            type="button"
+            className={`help-btn${tutorialOpen ? " hidden" : ""}`}
+            aria-label="Show tutorial"
+            title="Tutorial"
+            onClick={() => setTutorialOpen(true)}
+          >
+            ?
+          </button>
           {zoomAt && (
             <div
               className="zoom-level"
@@ -1018,6 +1091,10 @@ export function App() {
             ×
           </button>
         </div>
+      )}
+
+      {ready && tutorialOpen && (
+        <Tutorial host={tutorialHost} onClosed={() => setTutorialOpen(false)} />
       )}
 
       <Dialogs />
