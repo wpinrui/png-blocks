@@ -352,7 +352,7 @@ export function App() {
     const ws = wsRef.current;
     if (!ws) return;
     ws.updateToolbox(
-      query.trim() ? searchToolboxXml(query, ws) : toolboxXml(showExtensions),
+      query.trim() ? searchToolboxXml(query, ws, showExtensions) : toolboxXml(showExtensions),
     );
     rerenderToolbox(ws);
     // The category column changes width with extensions shown.
