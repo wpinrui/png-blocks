@@ -201,6 +201,14 @@ input::placeholder {
   display: flex;
 }
 
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  margin-right: 8px;
+  border-radius: 9px;
+  color: var(--color-text-muted);
+}
+
 .copy-main,
 .copy-caret {
   height: 36px;
@@ -1186,4 +1194,127 @@ input::placeholder {
 
 .footer-repo a {
   font-weight: 600;
+}
+
+/* ---------- Dark mode: background and bars only ---------- */
+
+:root[data-theme="dark"] body {
+  background-color: var(--dark-bg);
+}
+
+:root[data-theme="dark"] .header {
+  background: var(--dark-header);
+  border-bottom-color: var(--dark-border);
+}
+
+:root[data-theme="dark"] .tab {
+  color: var(--dark-text-muted);
+}
+
+:root[data-theme="dark"] .tab:hover {
+  background: var(--dark-hover);
+  color: var(--dark-text);
+}
+
+:root[data-theme="dark"] .tab.active {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  border-bottom-color: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+:root[data-theme="dark"] .header .icon-btn {
+  color: var(--dark-text-muted);
+}
+
+:root[data-theme="dark"] .header .icon-btn:hover {
+  background: var(--dark-hover);
+  color: var(--dark-text);
+}
+
+:root[data-theme="dark"] .toolbar {
+  background: var(--dark-surface);
+  border-bottom-color: var(--dark-border-soft);
+}
+
+:root[data-theme="dark"] .search {
+  background: var(--dark-bg);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+:root[data-theme="dark"] .search:focus {
+  background: var(--dark-surface);
+  border-color: var(--color-accent);
+}
+
+:root[data-theme="dark"] .search::placeholder,
+:root[data-theme="dark"] .search-icon {
+  color: var(--dark-text-faint);
+}
+
+:root[data-theme="dark"] .sidebar-edge {
+  background: var(--dark-border);
+}
+
+:root[data-theme="dark"] .workspace {
+  --colour-workspace: var(--dark-canvas);
+  --colour-flyout: var(--dark-flyout);
+}
+
+:root[data-theme="dark"] .workspace .blocklyToolbox {
+  --colour-toolbox: var(--dark-surface);
+  --colour-toolboxSelected: var(--dark-selected);
+  --colour-toolboxText: var(--dark-text-muted);
+  border-color: var(--dark-border-soft);
+}
+
+:root[data-theme="dark"] .workspace .blocklyToolboxCategory:hover {
+  background: var(--dark-hover);
+}
+
+:root[data-theme="dark"] .workspace .blocklyToolboxSelected,
+:root[data-theme="dark"] .workspace .blocklyToolboxSelected:hover {
+  background: var(--dark-selected);
+}
+
+:root[data-theme="dark"]
+  .workspace
+  .blocklyToolboxSelected
+  .blocklyToolboxCategoryLabel {
+  color: var(--dark-text);
+}
+
+:root[data-theme="dark"] .workspace .blocklyFlyoutLabelText {
+  fill: var(--dark-text-muted);
+}
+
+:root[data-theme="dark"] .workspace .blocklyMainBackground {
+  stroke: var(--dark-border);
+}
+
+:root[data-theme="dark"] .workspace pattern line {
+  stroke: var(--dark-grid);
+}
+
+:root[data-theme="dark"] .ext-toggle,
+:root[data-theme="dark"] .help-btn,
+:root[data-theme="dark"] .zoom-level {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--dark-text-muted);
+}
+
+:root[data-theme="dark"] .empty-hint strong {
+  color: var(--dark-text-muted);
+}
+
+:root[data-theme="dark"] .footer {
+  background: var(--dark-bg);
+  border-top-color: var(--dark-border);
+  color: var(--dark-text-muted);
+}
+
+:root[data-theme="dark"] .footer a {
+  color: var(--dark-link);
 }
