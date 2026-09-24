@@ -767,6 +767,10 @@ input::placeholder {
   opacity: 0;
 }
 
+.tutorial.closing {
+  transition-duration: 1.05s;
+}
+
 .tutorial-head {
   display: flex;
   align-items: center;

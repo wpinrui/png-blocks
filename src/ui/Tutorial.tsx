@@ -37,6 +37,8 @@ const STEPS = [
 ];
 
 const QUERY = "repeat until";
+// How long the card takes to fold into the ? button; matches .tutorial.closing.
+const COLLAPSE_MS = 1050;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 type Point = { x: number; y: number };
@@ -361,7 +363,7 @@ export function Tutorial({
     setCursor((c) => ({ ...c, visible: false }));
     hostRef.current.end();
     setPos(collapsedAt());
-    window.setTimeout(onClosed, 350);
+    window.setTimeout(onClosed, COLLAPSE_MS);
   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: close is fresh each render
@@ -382,7 +384,7 @@ export function Tutorial({
       {ghost && <GhostView ghost={ghost} />}
       <div
         ref={cardRef}
-        className={`tutorial${phase === "open" ? "" : " folded"}`}
+        className={`tutorial${phase === "open" ? "" : " folded"}${phase === "closing" ? " closing" : ""}`}
         role="dialog"
         aria-label="Tutorial"
         style={{ left: pos.x, top: pos.y }}
