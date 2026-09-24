@@ -149,15 +149,15 @@ export function App() {
           style={{ width: "100%" }}
         />
         <label style={{ display: "block", marginTop: 8 }}>
-          Scale{" "}
-          <select
+          Size {scale}x{" "}
+          <input
+            type="range"
+            min={0.5}
+            max={6}
+            step={0.25}
             value={scale}
             onChange={(e) => setScale(Number(e.target.value))}
-          >
-            <option value={1}>1x</option>
-            <option value={2}>2x</option>
-            <option value={3}>3x</option>
-          </select>
+          />
         </label>
         <p aria-live="polite">{status}</p>
 
