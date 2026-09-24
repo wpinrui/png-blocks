@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import * as SB from "scratch-blocks";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   copyWorkspace,
   downloadWorkspace,
@@ -48,6 +49,9 @@ const SCALE_KEY = "sbp-scale";
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 4;
 const START_ZOOM = 0.675;
+// Match the ext-slide-in and ext-slide-out animations in base.css.
+const EXT_OPEN_MS = 350;
+const EXT_CLOSE_MS = 250;
 // Zoom in percent of START_ZOOM: buttons step 80, 100, 120, ...; the wheel
 // moves linearly by WHEEL_PERCENT per 50px notch.
 const ZOOM_STEP_PERCENT = 20;
@@ -272,6 +276,8 @@ export function App() {
   const [query, setQuery] = useState("");
   const [scale, setScaleState] = useState(loadScale);
   const [showExtensions, setShowExtensions] = useState(false);
+  const [extAnim, setExtAnim] = useState<"opening" | "closing" | null>(null);
+  const [extSep, setExtSep] = useState<HTMLElement | null>(null);
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [draft, setDraft] = useState("");
   const [toast, setToast] = useState<Toast | null>(null);
@@ -456,6 +462,7 @@ export function App() {
       query.trim() ? searchToolboxXml(query, ws, showExtensions) : toolboxXml(showExtensions),
     );
     rerenderToolbox(ws);
+    setExtSep(divRef.current?.querySelector<HTMLElement>(".ext-sep") ?? null);
     // The category column changes width with extensions shown.
     ws.resize();
     refreshEmpty(ws);
@@ -473,6 +480,23 @@ export function App() {
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
   const activeTab = state.tabs.find((t) => t.id === state.active);
+
+  // Extension categories slide in after they are added, and slide out
+  // before they are removed.
+  function toggleExtensions() {
+    if (extAnim) return;
+    if (showExtensions) {
+      setExtAnim("closing");
+      window.setTimeout(() => {
+        setShowExtensions(false);
+        setExtAnim(null);
+      }, EXT_CLOSE_MS);
+    } else {
+      setShowExtensions(true);
+      setExtAnim("opening");
+      window.setTimeout(() => setExtAnim(null), EXT_OPEN_MS);
+    }
+  }
 
   function newTab() {
     const s = snapshot();
@@ -806,7 +830,9 @@ export function App() {
       </header>
 
       <main className="stage">
-        <div className={`workspace-wrap${showExtensions ? " ext" : ""}`}>
+        <div
+          className={`workspace-wrap${showExtensions ? " ext" : ""}${extAnim ? ` ext-${extAnim}` : ""}`}
+        >
           <div ref={divRef} className="workspace" />
           <div className="toolbar">
             <div className="search-wrap">
@@ -820,18 +846,22 @@ export function App() {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            <button
-              type="button"
-              className="switch-btn"
-              aria-pressed={showExtensions}
-              title="Show extension categories"
-              onClick={() => setShowExtensions(!showExtensions)}
-            >
-              <span className={`switch${showExtensions ? " on" : ""}`} />
-              Extensions
-            </button>
           </div>
           <div className="sidebar-edge" />
+          {extSep &&
+            createPortal(
+              <button
+                type="button"
+                className={`ext-toggle${showExtensions && extAnim !== "closing" ? " open" : ""}`}
+                aria-expanded={showExtensions}
+                aria-label={showExtensions ? "Hide extensions" : "Show extensions"}
+                title={showExtensions ? "Hide extensions" : "Show extensions"}
+                onClick={toggleExtensions}
+              >
+                <ChevronDown size={18} aria-hidden="true" />
+              </button>,
+              extSep,
+            )}
           <button
             ref={helpRef}
             type="button"
