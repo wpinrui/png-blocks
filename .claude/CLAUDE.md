@@ -53,7 +53,7 @@ Still on, because none of it is code quality:
 
 ## Deploy
 - Netlify publishes https://pngblocks.netlify.app from the `deploy` branch. Merging to `main` does not deploy.
-- Deploy only when I say "deploy". Then: `yarn build` on `main` must pass, fast-forward with `git push origin origin/main:deploy`, tag that commit `v<package.json version>`, push the tag, and run `gh release create v<version> --generate-notes`.
+- Deploy only when I say "deploy". Then: `yarn build` on `main` must pass, fast-forward with `git push origin origin/main:deploy`, tag that commit `v<package.json version>`, and push the tag. No GitHub releases.
 - `deploy` only ever fast-forwards to a `main` commit. Never commit to it, never force-push it. It is exempt from the `<type>/<kebab-summary>` naming rule.
 
 ## Tasks & questions
