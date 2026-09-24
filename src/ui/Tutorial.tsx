@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import * as SB from "scratch-blocks";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { inlineStyles } from "../blocks/export";
@@ -410,7 +411,7 @@ export function Tutorial({
             title="Close tutorial"
             onClick={close}
           >
-            ×
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
         <div className="tutorial-title">{current?.title}</div>

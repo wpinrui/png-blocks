@@ -1,10 +1,14 @@
 import {
+  ChevronDown,
   Clipboard,
   ClipboardCheck,
   ClipboardX,
   Download,
   FileX,
   type LucideIcon,
+  Plus,
+  Search,
+  X,
 } from "lucide-react";
 import * as SB from "scratch-blocks";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
@@ -744,12 +748,7 @@ export function App() {
                       openMenu(e.currentTarget.closest(".tab") ?? e.currentTarget);
                     }}
                   >
-                    <img
-                      src={`${MEDIA}dropdown-arrow-dark.svg`}
-                      width="10"
-                      height="7"
-                      alt=""
-                    />
+                    <ChevronDown size={16} aria-hidden="true" />
                   </button>
                 )}
                 <button
@@ -766,7 +765,7 @@ export function App() {
                   }}
                   onDoubleClick={(e) => e.stopPropagation()}
                 >
-                  ×
+                  <X size={16} aria-hidden="true" />
                 </button>
               </div>
             );
@@ -778,7 +777,7 @@ export function App() {
             title="New tab"
             onClick={newTab}
           >
-            +
+            <Plus size={18} aria-hidden="true" />
           </button>
         </nav>
 
@@ -800,7 +799,7 @@ export function App() {
               aria-expanded={overlay?.kind === "copy"}
               onClick={(e) => toggleCopyMenu(e.currentTarget.parentElement ?? e.currentTarget)}
             >
-              <img src={`${MEDIA}dropdown-arrow.svg`} width="11" height="8" alt="" />
+              <ChevronDown size={18} aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -810,14 +809,17 @@ export function App() {
         <div className={`workspace-wrap${showExtensions ? " ext" : ""}`}>
           <div ref={divRef} className="workspace" />
           <div className="toolbar">
-            <input
-              type="search"
-              className="search"
-              placeholder="Search blocks"
-              aria-label="Search blocks"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+            <div className="search-wrap">
+              <Search className="search-icon" size={16} aria-hidden="true" />
+              <input
+                type="search"
+                className="search"
+                placeholder="Search blocks"
+                aria-label="Search blocks"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
             <button
               type="button"
               className="switch-btn"
@@ -1108,7 +1110,7 @@ export function App() {
             aria-label="Dismiss"
             onClick={() => setToast(null)}
           >
-            ×
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
       )}
