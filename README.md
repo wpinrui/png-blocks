@@ -4,6 +4,8 @@ Clean pictures of Scratch code, ready for your slides and worksheets.
 
 Snap Scratch 3 blocks together exactly as you would in Scratch, then copy them to your clipboard as a transparent PNG trimmed to the blocks. Paste straight into Google Slides, PowerPoint, Word or Docs. No screenshots, no cropping, no stray backgrounds.
 
+**[Open PNG blocks!](https://pngblocks.netlify.app)** It runs in your browser, with nothing to install or sign up for.
+
 ![The PNG blocks! window: a Scratch script on the canvas with the block palette on the left](docs/images/window.png)
 
 ## What you get
@@ -37,21 +39,6 @@ Right-click any block and choose **Copy Block to Clipboard** to grab that block 
 - **Tutorial.** A short guided tour plays on your first visit. Replay it any time with the graduation cap button.
 
 ![Dark mode with the Pen extension open](docs/images/dark.png)
-
-## Running PNG blocks!
-
-PNG blocks! runs in your browser. To start it on your own computer, install [Node.js](https://nodejs.org) and [Yarn](https://classic.yarnpkg.com), then run:
-
-```
-git clone https://github.com/wpinrui/png-blocks.git
-cd png-blocks
-yarn
-yarn dev
-```
-
-Open the address it prints, usually http://localhost:5173.
-
-To host it yourself, run `yarn build` and upload the `dist/` folder to any static web host.
 
 ## Crediting Scratch
 
