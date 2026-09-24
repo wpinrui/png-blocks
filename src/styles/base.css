@@ -769,7 +769,7 @@ input::placeholder {
 }
 
 .tutorial.slow {
-  transition-duration: 1.05s;
+  transition-duration: 0.7s;
 }
 
 /* The first frame lands on the ? button without animating from wherever
