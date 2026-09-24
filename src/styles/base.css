@@ -32,7 +32,8 @@ button {
   cursor: pointer;
 }
 
-input {
+/* Blockly's field editor sets its own font. */
+input:not(.blocklyHtmlInput) {
   font: inherit;
 }
 
@@ -769,6 +770,12 @@ input::placeholder {
 
 .tutorial.slow {
   transition-duration: 1.05s;
+}
+
+/* The first frame lands on the ? button without animating from wherever
+   the card was first measured. */
+.tutorial.placing {
+  transition: none;
 }
 
 .tutorial-head {
