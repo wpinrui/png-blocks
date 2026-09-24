@@ -1,3 +1,11 @@
+import {
+  Clipboard,
+  ClipboardCheck,
+  ClipboardX,
+  Download,
+  FileX,
+  type LucideIcon,
+} from "lucide-react";
 import * as SB from "scratch-blocks";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import {
@@ -25,6 +33,7 @@ type Overlay =
 
 type Toast = {
   tone: "success" | "warning" | "error";
+  icon: LucideIcon;
   title: string;
   body: string;
   download?: boolean;
@@ -552,6 +561,7 @@ export function App() {
 
   const emptyToast: Toast = {
     tone: "warning",
+    icon: Clipboard,
     title: "Nothing to copy",
     body: "This tab has no blocks yet. Drag some in from the left.",
   };
@@ -606,6 +616,7 @@ export function App() {
       const [w, h] = estimateSize(ws, scale);
       showToast({
         tone: "success",
+        icon: ClipboardCheck,
         title: "Copied to clipboard",
         body: `${w} × ${h} px at ${formatScale(scale)} size`,
       });
@@ -624,12 +635,14 @@ export function App() {
       const png = await copyWorkspace(ws, scale);
       showToast({
         tone: "success",
+        icon: ClipboardCheck,
         title: "Copied to clipboard",
         body: `${await pngSize(png)} at ${formatScale(scale)} size`,
       });
     } catch (e) {
       showToast({
         tone: "error",
+        icon: ClipboardX,
         title: "Couldn't copy",
         body: `${e instanceof Error ? e.message : String(e)}. You can download the PNG instead.`,
         download: true,
@@ -650,12 +663,14 @@ export function App() {
       const png = await downloadWorkspace(ws, scale, name);
       showToast({
         tone: "success",
+        icon: Download,
         title: "Downloaded",
         body: `${name}, ${await pngSize(png)}`,
       });
     } catch (e) {
       showToast({
         tone: "error",
+        icon: FileX,
         title: "Couldn't download",
         body: e instanceof Error ? e.message : String(e),
       });
@@ -1073,7 +1088,7 @@ export function App() {
 
       {toast && (
         <div className={`toast ${toast.tone}`} role="status" aria-live="polite">
-          <span className={`dot ${toast.tone}`} />
+          <toast.icon className="toast-icon" size={20} aria-hidden="true" />
           <div className="toast-body">
             <strong>{toast.title}</strong>
             <span>{toast.body}</span>

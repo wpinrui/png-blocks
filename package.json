@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "blockly": "12.5.1",
+    "lucide-react": "^1.48.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "scratch-blocks": "2.1.19",
