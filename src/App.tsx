@@ -15,7 +15,11 @@ type TabState = { tabs: Tab[]; active: string };
 
 type Anchor = { left: number; top: number };
 type Overlay =
-  | { kind: "tabmenu" | "rename" | "close"; tabId: string; at: Anchor }
+  | {
+      kind: "tabmenu" | "rename" | "close" | "clear";
+      tabId: string;
+      at: Anchor;
+    }
   | { kind: "copy"; at: Anchor };
 
 type Toast = {
@@ -479,6 +483,24 @@ export function App() {
     setOverlay(null);
   }
 
+  function clearTab(id: string) {
+    const s = snapshot();
+    const ws = wsRef.current;
+    if (id === s.active && ws) {
+      loadingRef.current = true;
+      loadXml(ws, "");
+      loadingRef.current = false;
+      refreshEmpty(ws);
+      commit(snapshot());
+    } else {
+      commit({
+        ...s,
+        tabs: s.tabs.map((t) => (t.id === id ? { ...t, xml: "" } : t)),
+      });
+    }
+    setOverlay(null);
+  }
+
   function requestClose(id: string, at: Anchor) {
     const s = snapshot();
     const tab = s.tabs.find((t) => t.id === id);
@@ -819,6 +841,21 @@ export function App() {
             type="button"
             role="menuitem"
             className="menu-item danger"
+            disabled={
+              overlayTab.id === state.active
+                ? empty
+                : !hasContent(overlayTab.xml)
+            }
+            onClick={() =>
+              setOverlay({ kind: "clear", tabId: overlayTab.id, at: overlay.at })
+            }
+          >
+            Clear tab
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="menu-item danger"
             onClick={() => requestClose(overlayTab.id, overlay.at)}
           >
             Close tab
@@ -886,6 +923,34 @@ export function App() {
               onClick={() => closeTab(overlayTab.id)}
             >
               Close tab
+            </button>
+          </div>
+        </div>
+      )}
+
+      {overlay?.kind === "clear" && overlayTab && (
+        <div
+          className="popover panel"
+          role="alertdialog"
+          aria-label="Clear tab"
+          style={overlay.at}
+        >
+          <div className="panel-title">Clear “{overlayTab.name}”?</div>
+          <div className="panel-text">
+            Every block and comment on this tab will be deleted.
+          </div>
+          <div className="actions">
+            <button type="button" className="btn" onClick={() => setOverlay(null)}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-danger"
+              // biome-ignore lint/a11y/noAutofocus: confirm is the expected next action
+              autoFocus
+              onClick={() => clearTab(overlayTab.id)}
+            >
+              Clear tab
             </button>
           </div>
         </div>

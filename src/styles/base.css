@@ -293,6 +293,13 @@ input::placeholder {
   background: var(--color-danger-soft);
 }
 
+.menu-item:disabled,
+.menu-item:disabled:hover {
+  background: transparent;
+  color: var(--color-text-faint);
+  cursor: default;
+}
+
 .menu-hint {
   color: var(--color-text-faint);
   font-size: var(--font-size-small);
