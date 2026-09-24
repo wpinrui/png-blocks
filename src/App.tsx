@@ -14,7 +14,13 @@ import {
   X,
 } from "lucide-react";
 import * as SB from "scratch-blocks";
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { version } from "../package.json";
 import {
@@ -49,6 +55,8 @@ type Toast = {
   title: string;
   body: string;
   download?: boolean;
+  // Show next to this point (the pointer) instead of under Copy PNG.
+  at?: { x: number; y: number };
 };
 
 const STORAGE_KEY = "sbp-tabs";
@@ -245,6 +253,17 @@ function registerCopyBlockItem() {
   });
 }
 
+// Where the pointer last went down, so a toast can appear beside it.
+const lastPointer = { x: 0, y: 0 };
+document.addEventListener(
+  "pointerdown",
+  (e) => {
+    lastPointer.x = e.clientX;
+    lastPointer.y = e.clientY;
+  },
+  true,
+);
+
 const workspaceXml = (ws: SB.WorkspaceSvg) =>
   SB.Xml.domToText(SB.Xml.workspaceToDom(ws));
 
@@ -351,6 +370,7 @@ export function App() {
   const stateRef = useRef(state);
   const loadingRef = useRef(false);
   const toastTimer = useRef<number | undefined>(undefined);
+  const toastRef = useRef<HTMLDivElement>(null);
 
   const commit = (next: TabState) => {
     stateRef.current = next;
@@ -548,6 +568,21 @@ export function App() {
     }
   }
 
+  // A pointer toast sits below-right of the pointer, kept in the window.
+  useLayoutEffect(() => {
+    const el = toastRef.current;
+    if (!el) return;
+    const at = toast?.at;
+    if (!at) {
+      el.style.left = "";
+      el.style.top = "";
+      return;
+    }
+    const m = 12;
+    el.style.left = `${Math.max(m, Math.min(at.x + 14, window.innerWidth - el.offsetWidth - m))}px`;
+    el.style.top = `${Math.max(m, Math.min(at.y + 14, window.innerHeight - el.offsetHeight - m))}px`;
+  }, [toast]);
+
   const activeTab = state.tabs.find((t) => t.id === state.active);
 
   // Extension categories slide in after they are added, and slide out
@@ -721,12 +756,14 @@ export function App() {
   };
 
   onCopyBlock = async (block) => {
+    const at = { ...lastPointer };
     try {
       const png = await copyBlock(block, scale);
       showToast({
         tone: "success",
         icon: ClipboardCheck,
         title: "Copied to clipboard",
+        at,
         body: `${await pngSize(png)} at ${formatScale(scale)} size`,
       });
     } catch (e) {
@@ -734,6 +771,7 @@ export function App() {
         tone: "error",
         icon: ClipboardX,
         title: "Couldn't copy",
+        at,
         body: e instanceof Error ? e.message : String(e),
       });
     }
@@ -1219,7 +1257,12 @@ export function App() {
       )}
 
       {toast && (
-        <div className={`toast ${toast.tone}`} role="status" aria-live="polite">
+        <div
+          ref={toastRef}
+          className={`toast ${toast.tone}${toast.at ? " at-pointer" : ""}`}
+          role="status"
+          aria-live="polite"
+        >
           <toast.icon className="toast-icon" size={20} aria-hidden="true" />
           <div className="toast-body">
             <strong>{toast.title}</strong>

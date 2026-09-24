@@ -987,6 +987,10 @@ input::placeholder {
   background: color-mix(in srgb, currentColor 12%, transparent);
 }
 
+.toast.at-pointer {
+  right: auto;
+}
+
 .toast-icon {
   flex-shrink: 0;
 }
