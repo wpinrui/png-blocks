@@ -50,7 +50,12 @@ function loadXml(ws: SB.WorkspaceSvg, xml: string) {
     ws.clear();
   }
   ensureDefaults(ws);
-  ws.refreshToolboxSelection();
+  rerenderToolbox(ws);
+}
+
+// scratch-blocks' toolbox ignores refreshSelection; it must be forced.
+function rerenderToolbox(ws: SB.WorkspaceSvg) {
+  (ws.getToolbox() as unknown as { forceRerender(): void }).forceRerender();
 }
 
 const workspaceXml = (ws: SB.WorkspaceSvg) =>
@@ -127,14 +132,23 @@ export function App() {
     loadingRef.current = false;
 
     let timer: number | undefined;
+    let toolboxTimer: number | undefined;
     ws.addChangeListener((e: SB.Events.Abstract) => {
       if (e.isUiEvent || loadingRef.current) return;
+      const type = String(e.type);
+      const ev = e as { json?: { type?: string }; oldJson?: { type?: string } };
+      const blockType = ev.json?.type ?? ev.oldJson?.type;
+      if (type.startsWith("var_") || blockType === "procedures_definition") {
+        window.clearTimeout(toolboxTimer);
+        toolboxTimer = window.setTimeout(() => rerenderToolbox(ws), 100);
+      }
       window.clearTimeout(timer);
       timer = window.setTimeout(() => commit(snapshot()), 300);
     });
 
     return () => {
       window.clearTimeout(timer);
+      window.clearTimeout(toolboxTimer);
       ws.dispose();
       wsRef.current = null;
     };
@@ -144,6 +158,7 @@ export function App() {
     const ws = wsRef.current;
     if (!ws) return;
     ws.updateToolbox(query.trim() ? searchToolboxXml(query, ws) : toolboxXml());
+    rerenderToolbox(ws);
   }, [query]);
 
   function newTab() {
