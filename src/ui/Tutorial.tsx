@@ -391,7 +391,12 @@ export function Tutorial({
 
   return (
     <>
-      <div className="tutorial-blocker" />
+      {phase !== "closing" && (
+        // The demo drives the workspace, so a click outside the card closes
+        // the tutorial rather than reaching the app. Escape covers keyboard.
+        // biome-ignore lint/a11y/noStaticElementInteractions: click-away layer
+        <div className="tutorial-blocker" onPointerDown={close} />
+      )}
       {ghost && <GhostView ghost={ghost} />}
       <div
         ref={cardRef}
