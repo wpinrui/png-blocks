@@ -36,13 +36,9 @@ function InputField({
   const input = block.inputs[index];
   if (!input) return null;
   const listId = `opts-${block.key}-${index}`;
-  const label = `Input ${index + 1} (${input.kind})`;
-  if (input.kind === "boolean") {
-    return <div>{label}: empty slot</div>;
-  }
+  if (input.kind === "boolean") return null;
   return (
     <label style={{ display: "block", marginBottom: 6 }}>
-      {label}:{" "}
       {input.kind === "color" ? (
         <input
           type="color"
@@ -112,7 +108,7 @@ export function App() {
   async function copy(code: string, name: string) {
     try {
       await copyPng(code, scale);
-      setStatus(`Copied "${name}" as PNG.`);
+      setStatus(`Copied ${name}`);
     } catch (e) {
       setStatus(`Copy failed: ${String(e)}`);
     }
@@ -145,7 +141,6 @@ export function App() {
         }}
       >
         <h1 style={{ marginTop: 0 }}>Scratch block PNG</h1>
-        <p>Click a block to copy it as a transparent PNG.</p>
         <input
           type="search"
           placeholder="Search blocks"
@@ -154,7 +149,7 @@ export function App() {
           style={{ width: "100%" }}
         />
         <label style={{ display: "block", marginTop: 8 }}>
-          PNG scale:{" "}
+          Scale{" "}
           <select
             value={scale}
             onChange={(e) => setScale(Number(e.target.value))}
@@ -166,8 +161,6 @@ export function App() {
         </label>
         <p aria-live="polite">{status}</p>
 
-        <h2>Editor</h2>
-        {!selected && !codeOverride && <p>Click a block to edit it here.</p>}
         {selected &&
           selected.inputs.map((_, i) => (
             <InputField
@@ -186,14 +179,14 @@ export function App() {
             </div>
             <button
               type="button"
-              onClick={() => void copy(selectedCode, "edited block")}
+              onClick={() => void copy(selectedCode, selected?.label ?? "")}
             >
               Copy PNG
             </button>
           </>
         )}
         <label style={{ display: "block", marginTop: 8 }}>
-          scratchblocks code (editable, supports nesting and stacking):
+          Code
           <textarea
             value={selectedCode}
             onChange={(e) => setCodeOverride(e.target.value)}
@@ -202,45 +195,39 @@ export function App() {
           />
         </label>
 
-        <h2>Attribution</h2>
-        <p>
-          Scratch is developed by the Lifelong Kindergarten Group at the MIT
-          Media Lab. See{" "}
-          <a href="https://scratch.mit.edu" target="_blank" rel="noreferrer">
-            scratch.mit.edu
-          </a>
-          . Images of Scratch blocks are licensed under{" "}
-          <a
-            href="https://creativecommons.org/licenses/by-sa/2.0/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            CC BY-SA 2.0
-          </a>
-          , so PNGs copied from this page carry that license and need the same
-          credit.
-        </p>
-        <p>
-          Blocks are rendered with{" "}
-          <a
-            href="https://github.com/scratchblocks/scratchblocks"
-            target="_blank"
-            rel="noreferrer"
-          >
-            scratchblocks
-          </a>{" "}
-          by Tim Radvan and contributors (MIT license), including its block
-          definitions.
-        </p>
-        <p>
-          This site is not affiliated with, sponsored by or endorsed by the
-          Scratch Foundation or MIT. Scratch is a trademark of the Scratch
-          Foundation.
-        </p>
+        <footer style={{ marginTop: 16 }}>
+          <p>
+            Scratch is developed by the Lifelong Kindergarten Group at the MIT
+            Media Lab. See{" "}
+            <a href="https://scratch.mit.edu" target="_blank" rel="noreferrer">
+              scratch.mit.edu
+            </a>
+            . Block images:{" "}
+            <a
+              href="https://creativecommons.org/licenses/by-sa/2.0/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CC BY-SA 2.0
+            </a>
+            .
+          </p>
+          <p>
+            Rendered with{" "}
+            <a
+              href="https://github.com/scratchblocks/scratchblocks"
+              target="_blank"
+              rel="noreferrer"
+            >
+              scratchblocks
+            </a>{" "}
+            (MIT). Not affiliated with the Scratch Foundation or MIT.
+          </p>
+        </footer>
       </aside>
 
       <main style={{ flex: "1 1 400px", minWidth: 0 }}>
-        {groups.length === 0 && <p>No blocks match.</p>}
+        {groups.length === 0 && <p>No matches</p>}
         {groups.map((g) => (
           <section key={g.category}>
             <h2>{CATEGORY_NAMES[g.category] ?? g.category}</h2>
@@ -248,7 +235,7 @@ export function App() {
               <div key={b.key} style={{ marginBottom: 6 }}>
                 <button
                   type="button"
-                  title={`Copy: ${b.label}`}
+                  title={b.label}
                   onClick={() => select(b)}
                   style={{
                     background: "none",
