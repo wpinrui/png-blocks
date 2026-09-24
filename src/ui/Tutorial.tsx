@@ -39,7 +39,7 @@ const STEPS = [
 const QUERY = "repeat until";
 // How long the card takes to fold into, or grow out of, the ? button;
 // matches .tutorial.slow.
-const COLLAPSE_MS = 1050;
+const COLLAPSE_MS = 700;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 type Point = { x: number; y: number };
