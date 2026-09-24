@@ -20,6 +20,7 @@
   --color-accent: #4c97ff;
   --color-accent-hover: #4280d7;
   --color-accent-active: #3373cc;
+  --color-link: #3373cc;
   --color-accent-strong: #2a5fa8;
   --color-accent-soft: #eaf2ff;
   --color-accent-ring: rgba(76, 151, 255, 0.22);
@@ -65,25 +66,68 @@
   --color-cat-pen: #0fbd8c;
   --color-cat-pen-edge: #0b8e69;
 
-  /* Dark mode palette. Only the page background and the bars use it;
-     menus, dialogs, toasts and blocks keep the light palette. */
-  --dark-bg: #1b1f27;
-  --dark-header: #151920;
-  --dark-surface: #232833;
-  --dark-canvas: #1e222b;
-  --dark-flyout: #262b36;
-  --dark-border: #343b49;
-  --dark-border-soft: #2d3340;
-  --dark-hover: #2c3240;
-  --dark-selected: #313a4d;
-  --dark-text: #e4e8f0;
-  --dark-text-muted: #a3acbd;
-  --dark-text-faint: #7b8496;
-  --dark-grid: #3a4150;
+  /* Dark mode palette: neutral greys, darkest for the header, lightest for
+     panels. Blocks and their text fields never use it. */
+  --dark-header: #111111;
+  --dark-bg: #181818;
+  --dark-canvas: #202020;
+  --dark-flyout: #2a2a2a;
+  --dark-surface: #303030;
+  --dark-hover: #3a3a3a;
+  --dark-hover-strong: #454545;
+  --dark-selected: #4a4a4a;
+  --dark-border: #505050;
+  --dark-border-soft: #3c3c3c;
+  --dark-text: #f2f2f2;
+  --dark-text-muted: #b8b8b8;
+  --dark-text-faint: #8c8c8c;
+  --dark-grid: #3e3e3e;
   --dark-link: #7fb2ff;
 
   --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-size-base: 14px;
   --font-size-caption: 13px;
   --font-size-small: 12px;
+}
+
+/* Dark mode: everything except blocks and their text fields, which Blockly
+   colours itself. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: var(--dark-bg);
+  --color-header: var(--dark-header);
+  --color-surface: var(--dark-surface);
+  --color-surface-sunken: var(--dark-bg);
+  --color-hover: var(--dark-hover);
+  --color-hover-strong: var(--dark-hover-strong);
+  --color-selected: var(--dark-selected);
+  --color-border: var(--dark-border);
+  --color-border-soft: var(--dark-border-soft);
+  --color-switch-off: var(--dark-hover-strong);
+  --color-text: var(--dark-text);
+  --color-text-muted: var(--dark-text-muted);
+  --color-text-faint: var(--dark-text-faint);
+  --color-text-scratch: var(--dark-text-muted);
+  --color-link: #7fb2ff;
+  --color-accent-strong: #9cc3ff;
+  --color-accent-soft: #243650;
+  --color-danger-text: #ff8a8f;
+  --color-danger-soft: #3a2326;
+  --color-success-bg: #1f3324;
+  --color-success-border: #2f5a37;
+  --color-success-text: #a5e3ad;
+  --color-warning-bg: #3a2f17;
+  --color-warning-border: #6b5424;
+  --color-warning-text: #f5cf7f;
+  --color-error-bg: #3a2124;
+  --color-error-border: #6e3035;
+  --color-error-text: #ff9aa0;
+  --color-grid: var(--dark-grid);
+  --color-scrim: rgba(0, 0, 0, 0.5);
+  --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.55);
+  --color-pointer: rgba(220, 226, 238, 0.45);
+  --color-pointer-strong: rgba(235, 240, 250, 0.7);
+  --color-pointer-pad: rgba(235, 240, 250, 0.16);
 }
