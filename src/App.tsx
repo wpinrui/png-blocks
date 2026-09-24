@@ -16,6 +16,7 @@ import {
 import * as SB from "scratch-blocks";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { version } from "../package.json";
 import {
   copyWorkspace,
   downloadWorkspace,
@@ -991,9 +992,9 @@ export function App() {
           >
             png-blocks
           </a>
-          <span>by</span>
+          <span>{version} by</span>
           <a href="https://github.com/wpinrui" target="_blank" rel="noreferrer">
-            wpinrui
+            Ivan
           </a>
         </div>
       </footer>

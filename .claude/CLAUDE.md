@@ -43,6 +43,7 @@ Still on, because none of it is code quality:
 ## Merge & PR
 - Open a PR as soon as the first commit is pushed. Never ask. Opening one says nothing about whether the work is ready to review or merge.
 - Squash-merge only, deleting the merged branch: `gh pr merge --squash --delete-branch`.
+- Every PR bumps `version` in `package.json` by semver: major for a breaking change, minor for a `feat`, patch for anything else. The footer shows it, so it must be right.
 - Run `/review` before every merge, unprompted, bar Dependabot bumps.
 - Pre-merge checks, all of them: review approved, tests green, typecheck clean, working tree clean, and no findings left open.
 - Triggers: `-r` review now. `-m` merge, and this IS the merge authorisation. `-rm` review then merge in the same turn if it passes, no pause between.
