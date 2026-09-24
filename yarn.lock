@@ -672,7 +672,7 @@ bidi-js@^1.0.3:
   dependencies:
     require-from-string "^2.0.2"
 
-blockly@^12.4.1:
+blockly@12.5.1, blockly@^12.4.1:
   version "12.5.1"
   resolved "https://registry.yarnpkg.com/blockly/-/blockly-12.5.1.tgz#5e63b65382861cc75a6a36a85d71346ea768f8e8"
   integrity sha512-etXLpUtEkcRibHGwIJ4BsvnIzMJJs0C0yPIjE/W0NCtj8ACha/a7Q9n7Ib6+j7N4EzQ0p28YPZMnypi5pNIj1g==
