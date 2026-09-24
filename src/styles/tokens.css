@@ -34,6 +34,9 @@
   --color-warning: #ffab19;
   --color-grid: #dddddd;
   --color-scrim: rgba(33, 41, 58, 0.32);
+  --color-pointer: rgba(70, 76, 92, 0.42);
+  --color-pointer-strong: rgba(47, 54, 71, 0.62);
+  --color-pointer-pad: rgba(47, 54, 71, 0.14);
   --shadow-popover: 0 12px 32px rgba(24, 34, 56, 0.16);
   --shadow-modal: 0 24px 64px rgba(20, 30, 50, 0.28);
 

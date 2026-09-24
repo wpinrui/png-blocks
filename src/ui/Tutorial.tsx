@@ -40,7 +40,26 @@ const QUERY = "repeat until";
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 type Point = { x: number; y: number };
-type Cursor = Point & { ms: number; pressed: boolean; visible: boolean };
+// iPad-style pointer: a small translucent dot that becomes a text beam over
+// inputs and a highlight pad over buttons.
+type Shape = { kind: "dot" | "beam" | "pad"; w: number; h: number; r: number };
+const DOT: Shape = { kind: "dot", w: 18, h: 18, r: 9 };
+const BEAM: Shape = { kind: "beam", w: 3, h: 20, r: 2 };
+const padOver = (r: DOMRect): Shape => ({
+  kind: "pad",
+  w: r.width + 10,
+  h: r.height + 10,
+  r: 12,
+});
+// Rough advance of one character in the search box, for the beam to follow.
+const CHAR_WIDTH = 7.2;
+
+type Cursor = Point & {
+  ms: number;
+  pressed: boolean;
+  visible: boolean;
+  shape: Shape;
+};
 type Ghost = Point & { ms: number; svg: SVGSVGElement; w: number; h: number };
 
 class Cancelled extends Error {}
@@ -115,6 +134,7 @@ export function Tutorial({
     ms: 0,
     pressed: false,
     visible: false,
+    shape: DOT,
   });
   const [ghost, setGhost] = useState<Ghost | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -187,6 +207,7 @@ export function Tutorial({
       setCursor((c) => ({ ...c, x, y, ms, visible: true }));
       await wait(ms);
     };
+    const shape = (next: Shape) => setCursor((c) => ({ ...c, shape: next }));
     const press = (pressed: boolean) =>
       setCursor((c) => ({ ...c, pressed, ms: 0 }));
     const click = async () => {
@@ -220,17 +241,22 @@ export function Tutorial({
         h.setQuery("");
         const r = search?.getBoundingClientRect();
         if (!r) return;
-        await move(r.left + 40, r.top + r.height / 2, 700);
+        const textX = r.left + 12;
+        const y = r.top + r.height / 2;
+        await move(textX + 30, y, 700);
+        shape(BEAM);
+        await move(textX, y, 150);
         await click();
         search?.classList.add("demo-focus");
         let q = "";
         for (const ch of QUERY) {
           q += ch;
           h.setQuery(q);
-          await wait(90);
+          await move(textX + q.length * CHAR_WIDTH, y, 90);
         }
         await wait(2200);
         search?.classList.remove("demo-focus");
+        shape(DOT);
         const p = canvasPoint(200, 200);
         await move(p.x, p.y, 700);
         await wait(700);
@@ -287,11 +313,14 @@ export function Tutorial({
         const r = copyBtn?.getBoundingClientRect();
         if (!r) return;
         await move(r.left + r.width / 2, r.top + r.height / 2, 900);
+        shape(padOver(r));
+        await wait(350);
         copyBtn?.classList.add("demo-press");
         await click();
         copyBtn?.classList.remove("demo-press");
         await h.copy();
-        await wait(2600);
+        await wait(2200);
+        shape(DOT);
         const p = canvasPoint(420, 260);
         await move(p.x, p.y, 800);
         await wait(900);
@@ -315,7 +344,7 @@ export function Tutorial({
       cancelled = true;
       for (const id of timers) window.clearTimeout(id);
       setGhost(null);
-      setCursor((c) => ({ ...c, pressed: false }));
+      setCursor((c) => ({ ...c, pressed: false, shape: DOT }));
       search?.classList.remove("demo-focus");
       copyBtn?.classList.remove("demo-press");
     };
@@ -400,7 +429,16 @@ export function Tutorial({
             transform: `translate(${cursor.x}px, ${cursor.y}px)`,
             transitionDuration: `${cursor.ms}ms`,
           }}
-        />
+        >
+          <div
+            className={`fake-cursor-shape ${cursor.shape.kind}`}
+            style={{
+              width: cursor.shape.w,
+              height: cursor.shape.h,
+              borderRadius: cursor.shape.r,
+            }}
+          />
+        </div>
       )}
     </>
   );

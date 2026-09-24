@@ -812,7 +812,8 @@ input::placeholder {
   filter: drop-shadow(0 6px 10px var(--color-scrim));
 }
 
-/* The demo pointer: a Scratch-yellow dot, deliberately unlike an OS cursor. */
+/* The demo pointer, iPad style: positioned by the outer box, shaped by the
+   inner one so position and shape animate independently. */
 .fake-cursor {
   position: fixed;
   left: 0;
@@ -825,46 +826,36 @@ input::placeholder {
   transition-timing-function: ease-in-out;
 }
 
-.fake-cursor::before,
-.fake-cursor::after {
-  content: "";
+.fake-cursor-shape {
   position: absolute;
-  border-radius: 50%;
-}
-
-.fake-cursor::after {
-  left: -12px;
-  top: -12px;
-  width: 24px;
-  height: 24px;
-  background: var(--color-cat-event);
-  border: 3px solid var(--color-surface);
-  box-shadow:
-    0 0 0 1px var(--color-cat-event-edge),
-    0 4px 10px var(--color-scrim);
-  transition: transform 0.15s ease;
-}
-
-.fake-cursor::before {
-  left: -22px;
-  top: -22px;
-  width: 44px;
-  height: 44px;
-  border: 3px solid var(--color-cat-event);
-  opacity: 0;
-  transform: scale(0.5);
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  background: var(--color-pointer);
   transition:
-    transform 0.25s ease,
-    opacity 0.25s ease;
+    width 0.2s ease,
+    height 0.2s ease,
+    border-radius 0.2s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease;
 }
 
-.fake-cursor.pressed::after {
-  transform: scale(0.8);
+.fake-cursor-shape.beam {
+  background: var(--color-pointer-strong);
 }
 
-.fake-cursor.pressed::before {
-  opacity: 0.7;
-  transform: scale(1);
+.fake-cursor-shape.pad {
+  background: var(--color-pointer-pad);
+}
+
+.fake-cursor.pressed .fake-cursor-shape {
+  transform: translate(-50%, -50%) scale(0.85);
+  background: var(--color-pointer-strong);
+}
+
+.fake-cursor.pressed .fake-cursor-shape.pad {
+  transform: translate(-50%, -50%) scale(0.96);
+  background: var(--color-pointer-pad);
 }
 
 .search.demo-focus {
