@@ -80,7 +80,7 @@ function matches(block: BlockDef, query: string): boolean {
 
 export function App() {
   const [query, setQuery] = useState("");
-  const [scale, setScale] = useState(2);
+  const [scale, setScale] = useState(1);
   const [values, setValues] = useState<Record<string, string[]>>({});
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [codeOverride, setCodeOverride] = useState<string | null>(null);
