@@ -1070,17 +1070,23 @@ export function App() {
         </div>
         <div className="footer-repo">
           <GitHubMark />
-          <a
-            href="https://github.com/wpinrui/png-blocks"
-            target="_blank"
-            rel="noreferrer"
-          >
-            png-blocks
-          </a>
-          <span>{version} by</span>
-          <a href="https://github.com/wpinrui" target="_blank" rel="noreferrer">
-            Ivan
-          </a>
+          <span>
+            <a
+              href="https://github.com/wpinrui/png-blocks"
+              target="_blank"
+              rel="noreferrer"
+            >
+              png-blocks
+            </a>{" "}
+            {version} by{" "}
+            <a
+              href="https://github.com/wpinrui"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Ivan
+            </a>
+          </span>
         </div>
       </footer>
 
