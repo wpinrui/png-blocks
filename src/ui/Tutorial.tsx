@@ -408,7 +408,7 @@ export function Tutorial({
             type="button"
             className="icon-btn"
             aria-label="Close tutorial"
-            title="Close tutorial"
+            data-tip="Close tutorial"
             onClick={close}
           >
             <X size={16} aria-hidden="true" />

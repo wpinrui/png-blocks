@@ -22,6 +22,7 @@ import {
 import { MEDIA, makeTheme, setupBlocks } from "./blocks/setup";
 import { searchToolboxXml, toolboxXml } from "./blocks/toolbox";
 import { Dialogs } from "./ui/Dialogs";
+import { Tooltips } from "./ui/Tooltips";
 import { TUTORIAL_KEY, Tutorial, type TutorialHost } from "./ui/Tutorial";
 
 type Tab = { id: string; name: string; xml: string };
@@ -242,8 +243,13 @@ function Logo() {
   const block = (w: number) =>
     `M0,4 A4,4 0 0 1 4,0 H12 ${tab} H${w - 4} A4,4 0 0 1 ${w},4 V32 A4,4 0 0 1 ${w - 4},36 H42 ${notch} H4 A4,4 0 0 1 0,32 Z`;
   return (
-    <svg width="66" height="50" viewBox="0 0 106 81" role="img">
-      <title>PNG blocks!</title>
+    <svg
+      width="66"
+      height="50"
+      viewBox="0 0 106 81"
+      role="img"
+      aria-label="PNG blocks!"
+    >
       <g transform="translate(1,37)">
         <path d={block(104)} className="logo-blue" />
         <text x="11" y="25" className="logo-text">
@@ -747,7 +753,7 @@ export function App() {
                 tabIndex={0}
                 aria-selected={active}
                 className={`tab${active ? " active" : ""}`}
-                title={t.name}
+                data-tip={t.name}
                 onClick={() => selectTab(t.id)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") selectTab(t.id);
@@ -766,7 +772,7 @@ export function App() {
                     type="button"
                     className="icon-btn"
                     aria-label="Tab options"
-                    title="Tab options"
+                    data-tip="Tab options"
                     onClick={(e) => {
                       e.stopPropagation();
                       openMenu(e.currentTarget.closest(".tab") ?? e.currentTarget);
@@ -779,7 +785,7 @@ export function App() {
                   type="button"
                   className="icon-btn"
                   aria-label={`Close ${t.name}`}
-                  title="Close tab"
+                  data-tip="Close tab"
                   onClick={(e) => {
                     e.stopPropagation();
                     requestClose(
@@ -798,7 +804,7 @@ export function App() {
             type="button"
             className="icon-btn new-tab"
             aria-label="New tab"
-            title="New tab"
+            data-tip="New tab"
             onClick={newTab}
           >
             <Plus size={18} aria-hidden="true" />
@@ -810,7 +816,6 @@ export function App() {
             <button
               type="button"
               className="copy-main"
-              title="Copy PNG"
               onClick={() => void copy()}
             >
               Copy PNG
@@ -855,7 +860,7 @@ export function App() {
                 className={`ext-toggle${showExtensions && extAnim !== "closing" ? " open" : ""}`}
                 aria-expanded={showExtensions}
                 aria-label={showExtensions ? "Hide extensions" : "Show extensions"}
-                title={showExtensions ? "Hide extensions" : "Show extensions"}
+                data-tip={showExtensions ? "Hide extensions" : "Show extensions"}
                 onClick={toggleExtensions}
               >
                 <ChevronDown size={18} aria-hidden="true" />
@@ -867,7 +872,7 @@ export function App() {
             type="button"
             className={`help-btn${tutorialOpen ? " hidden" : ""}`}
             aria-label="Show tutorial"
-            title="Tutorial"
+            data-tip="Tutorial"
             onClick={() => setTutorialOpen(true)}
           >
             ?
@@ -875,7 +880,7 @@ export function App() {
           {zoomAt && (
             <div
               className="zoom-level"
-              title="Zoom (100% is the reset level)"
+              data-tip="Zoom level"
               style={{ left: zoomAt.x, top: zoomAt.y }}
             >
               {Math.round(zoom * 100)}%
@@ -1150,6 +1155,7 @@ export function App() {
       )}
 
       <Dialogs />
+      <Tooltips />
     </div>
   );
 }
