@@ -987,8 +987,10 @@ input::placeholder {
   background: color-mix(in srgb, currentColor 12%, transparent);
 }
 
+/* Above Blockly's own layers, which sit around the pointer. */
 .toast.at-pointer {
   right: auto;
+  z-index: 100001;
 }
 
 .toast-icon {
