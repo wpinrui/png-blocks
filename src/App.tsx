@@ -29,6 +29,8 @@ const STORAGE_KEY = "sbp-tabs";
 const SCALE_KEY = "sbp-scale";
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 4;
+const START_ZOOM = 0.675;
+const ZOOM_STEP = 1.1;
 
 const newId = () => Math.random().toString(36).slice(2, 10);
 
@@ -221,6 +223,8 @@ export function App() {
   const [empty, setEmpty] = useState(false);
   const [paletteWidth, setPaletteWidth] = useState(310);
   const [size, setSize] = useState<[number, number]>([0, 0]);
+  const [zoom, setZoom] = useState(1);
+  const [zoomAt, setZoomAt] = useState<{ x: number; y: number } | null>(null);
   const divRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<SB.WorkspaceSvg | null>(null);
   const stateRef = useRef(state);
@@ -246,6 +250,27 @@ export function App() {
   const refreshEmpty = (ws: SB.WorkspaceSvg) => {
     setEmpty(isEmpty(ws));
     setPaletteWidth(ws.getMetricsManager().getAbsoluteMetrics().left);
+  };
+
+  // Zoom as a percentage of the reset level, pinned above Blockly's buttons.
+  const refreshZoom = (ws: SB.WorkspaceSvg) => {
+    setZoom(ws.scale / START_ZOOM);
+    const wrap = divRef.current?.parentElement;
+    const buttons = divRef.current?.querySelectorAll(".blocklyZoom");
+    if (!wrap || !buttons?.length) return;
+    let top = Number.POSITIVE_INFINITY;
+    let left = 0;
+    let right = 0;
+    for (const b of buttons) {
+      const r = b.getBoundingClientRect();
+      if (r.top < top) top = r.top;
+      left = r.left;
+      right = r.right;
+    }
+    const w = wrap.getBoundingClientRect();
+    const x = Math.round((left + right) / 2 - w.left);
+    const y = Math.round(top - w.top);
+    setZoomAt((p) => (p && p.x === x && p.y === y ? p : { x, y }));
   };
 
   const showToast = (t: Toast) => {
@@ -293,7 +318,12 @@ export function App() {
       toolbox: toolboxXml(false),
       media: MEDIA,
       theme: makeTheme(),
-      zoom: { controls: true, wheel: true, startScale: 0.675 },
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: START_ZOOM,
+        scaleSpeed: ZOOM_STEP,
+      },
       grid: { spacing: 40, length: 2, colour: grid },
       comments: true,
       collapse: false,
@@ -322,10 +352,14 @@ export function App() {
     loadXml(ws, s.tabs.find((t) => t.id === s.active)?.xml ?? "");
     loadingRef.current = false;
     refreshEmpty(ws);
+    refreshZoom(ws);
+    const onResize = () => refreshZoom(ws);
+    window.addEventListener("resize", onResize);
 
     let timer: number | undefined;
     let toolboxTimer: number | undefined;
     ws.addChangeListener((e: SB.Events.Abstract) => {
+      if (String(e.type) === "viewport_change") refreshZoom(ws);
       if (e.isUiEvent || loadingRef.current) return;
       setEmpty(isEmpty(ws));
       const type = String(e.type);
@@ -342,6 +376,7 @@ export function App() {
     return () => {
       window.clearTimeout(timer);
       window.clearTimeout(toolboxTimer);
+      window.removeEventListener("resize", onResize);
       ws.dispose();
       wsRef.current = null;
     };
@@ -653,6 +688,15 @@ export function App() {
             </button>
           </div>
           <div className="sidebar-edge" />
+          {zoomAt && (
+            <div
+              className="zoom-level"
+              title="Zoom (100% is the reset level)"
+              style={{ left: zoomAt.x, top: zoomAt.y }}
+            >
+              {Math.round(zoom * 100)}%
+            </div>
+          )}
           {empty && (
             <div className="empty-hint">
               <div>
