@@ -113,6 +113,8 @@ export function App() {
       zoom: { controls: true, wheel: true, startScale: 0.675 },
       grid: { spacing: 40, length: 2, colour: "#ddd" },
       comments: true,
+      collapse: false,
+      disable: false,
       sounds: false,
       trashcan: false,
       move: { scrollbars: true, drag: true, wheel: true },

@@ -401,4 +401,10 @@ export function setupBlocks() {
   defineCoreMenus();
   for (const b of EXTENSION_BLOCKS) defineExtensionBlock(b);
   setupPrompts();
+  // Items Blockly adds that the Scratch editor does not offer.
+  for (const id of ["blockInline", "blockHelp", "blockCollapseExpand", "blockDisable", "collapseWorkspace", "expandWorkspace"]) {
+    if (SB.ContextMenuRegistry.registry.getItem(id)) {
+      SB.ContextMenuRegistry.registry.unregister(id);
+    }
+  }
 }
