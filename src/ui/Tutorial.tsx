@@ -394,7 +394,7 @@ export function Tutorial({
       {ghost && <GhostView ghost={ghost} />}
       <div
         ref={cardRef}
-        className={`tutorial${phase === "open" ? "" : " folded"}${phase === "closing" || expanding ? " slow" : ""}`}
+        className={`tutorial${phase === "open" ? "" : " folded"}${phase === "closing" || expanding ? " slow" : ""}${phase === "opening" ? " placing" : ""}`}
         role="dialog"
         aria-label="Tutorial"
         style={{ left: pos.x, top: pos.y }}

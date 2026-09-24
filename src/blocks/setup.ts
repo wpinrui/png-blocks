@@ -441,6 +441,28 @@ function setupPrompts() {
   };
 }
 
+// Blockly nudges the editor over a whole-block field (number and text
+// slots) by a per-browser fudge, 1.5px times zoom down-right on Firefox.
+// Sit it on the field's rendered edge instead, stroke included.
+function alignFieldEditor() {
+  const proto = SB.Field.prototype as unknown as {
+    getScaledBBox(this: SB.Field): SB.utils.Rect;
+  };
+  const original = proto.getScaledBBox;
+  proto.getScaledBBox = function (this: SB.Field) {
+    const block = this.getSourceBlock() as SB.BlockSvg | null;
+    if (!block || !this.isFullBlockField()) return original.call(this);
+    const r = block.getSvgRoot().getBoundingClientRect();
+    const half = 0.5 * block.workspace.scale;
+    return new SB.utils.Rect(
+      r.top + window.scrollY - half,
+      r.bottom + window.scrollY + half,
+      r.left + window.scrollX - half,
+      r.right + window.scrollX + half,
+    );
+  };
+}
+
 let done = false;
 
 export function setupBlocks() {
@@ -453,6 +475,7 @@ export function setupBlocks() {
   defineCoreMenus();
   for (const b of EXTENSION_BLOCKS) defineExtensionBlock(b);
   setupPrompts();
+  alignFieldEditor();
   // Items Blockly adds that the Scratch editor does not offer.
   for (const id of ["blockInline", "blockHelp", "blockCollapseExpand", "blockDisable", "collapseWorkspace", "expandWorkspace"]) {
     if (SB.ContextMenuRegistry.registry.getItem(id)) {
