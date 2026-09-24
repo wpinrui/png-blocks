@@ -41,6 +41,8 @@ input::placeholder {
 }
 
 .app {
+  --palette-width: 310px;
+  --strip-height: 55px;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -61,6 +63,7 @@ input::placeholder {
 .logo {
   display: flex;
   align-items: center;
+  width: var(--palette-width);
   margin: 0;
   padding: 0 16px;
   flex-shrink: 0;
@@ -175,10 +178,11 @@ input::placeholder {
   opacity: 0.55;
 }
 
+/* Centred on the 44px active tab, which sits on the header's bottom edge. */
 .new-tab {
-  align-self: center;
+  align-self: flex-end;
   flex-shrink: 0;
-  margin-left: 4px;
+  margin: 0 0 7px 4px;
   width: 30px;
   height: 30px;
   font-size: 20px;
@@ -496,17 +500,35 @@ input::placeholder {
 /* ---------- Palette toolbar ---------- */
 
 .toolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 41;
+  width: var(--palette-width);
+  height: var(--strip-height);
   display: flex;
   gap: 8px;
   align-items: center;
   padding: 10px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border-soft);
-  flex-shrink: 0;
+}
+
+/* The sidebar's right edge, from the header down past the palette. */
+.sidebar-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--palette-width) - 1px);
+  z-index: 41;
+  width: 1px;
+  background: var(--color-border);
+  pointer-events: none;
 }
 
 .search {
-  width: 200px;
+  flex: 1;
+  min-width: 0;
   height: 34px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -524,6 +546,7 @@ input::placeholder {
 }
 
 .switch-btn {
+  flex-shrink: 0;
   height: 34px;
   display: flex;
   align-items: center;
@@ -597,7 +620,7 @@ input::placeholder {
   top: 0;
   bottom: 0;
   right: 0;
-  left: var(--palette-width, 310px);
+  left: var(--palette-width);
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -624,29 +647,47 @@ input::placeholder {
 }
 
 /* scratch-blocks toolbox, restyled to match the app chrome. */
-.workspace .blocklyToolbox,
-.workspace .scratchCategoryMenu {
+.workspace .blocklyToolbox {
   --colour-toolbox: var(--color-surface);
   --colour-toolboxSelected: var(--color-selected);
   --colour-toolboxText: var(--color-text-muted);
   border-color: var(--color-border-soft);
+  /* Sits under the search strip; Blockly sets top and height inline. */
+  top: var(--strip-height) !important;
+  height: calc(100% - var(--strip-height)) !important;
 }
 
-.workspace .scratchCategoryMenu {
-  width: 62px;
-  padding: 2px 0;
-  font-size: 11px;
-  line-height: 1.15;
-}
-
-.workspace .scratchCategoryMenuItem {
+.workspace .blocklyToolboxCategory {
   margin: 2px 4px;
   padding: 6px 0;
   border-radius: 8px;
 }
 
-.workspace .scratchCategoryMenuItem:hover {
+.workspace .blocklyToolboxCategory:hover {
   background: var(--color-bg);
+  color: inherit;
+}
+
+.workspace .blocklyToolboxSelected,
+.workspace .blocklyToolboxSelected:hover {
+  background: var(--color-selected);
+}
+
+/* scratch-blocks fixes labels at 60px, which also sets the column width. */
+.workspace .blocklyToolboxCategoryLabel {
+  width: 54px;
+  font-size: 11px;
+  line-height: 1.15;
+}
+
+/* Long extension names ("LEGO MINDSTORMS EV3") need a wider column. */
+.workspace-wrap.ext .blocklyToolboxCategoryLabel {
+  width: 86px;
+}
+
+.workspace .blocklyToolboxSelected .blocklyToolboxCategoryLabel {
+  color: var(--color-text);
+  font-weight: 700;
 }
 
 /* Extension icons are drawn white for use on a block, so give them the
@@ -661,29 +702,18 @@ input::placeholder {
   background: var(--color-cat-pen);
 }
 
-/* Long extension names ("LEGO MINDSTORMS EV3") need a wider column. */
-.workspace-wrap.ext .scratchCategoryMenu {
-  width: 88px;
-}
-
-.workspace .scratchCategoryMenuItem.categorySelected {
-  background: var(--color-selected);
-  color: var(--color-text);
-  font-weight: 700;
-}
-
 /* ---------- Toast ---------- */
 
+/* Drops in right under the Copy PNG button, where the eye already is. */
 .toast {
-  position: absolute;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%);
+  position: fixed;
+  top: 64px;
+  right: 14px;
   z-index: 45;
   display: flex;
   align-items: center;
   gap: 12px;
-  max-width: min(520px, 90%);
+  max-width: min(420px, calc(100vw - 28px));
   padding: 10px 10px 10px 14px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-soft);

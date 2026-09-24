@@ -89,6 +89,40 @@ function rerenderToolbox(ws: SB.WorkspaceSvg) {
   (ws.getToolbox() as unknown as { forceRerender(): void }).forceRerender();
 }
 
+type PositionedFlyout = {
+  isVisible(): boolean;
+  targetWorkspace: SB.WorkspaceSvg;
+  getWidth(): number;
+  getHeight(): number;
+  getX(): number;
+  getY(): number;
+  position(): void;
+  height_: number;
+  CORNER_RADIUS: number;
+  setBackgroundPath(width: number, height: number): void;
+  positionAt_(width: number, height: number, x: number, y: number): void;
+};
+
+// Blockly pins the palette to the top of the workspace at full height.
+// Start it below the search strip instead, as the toolbox does in CSS.
+function offsetPalette(ws: SB.WorkspaceSvg, top: number) {
+  const flyout = ws.getToolbox()?.getFlyout() as unknown as
+    | PositionedFlyout
+    | undefined;
+  if (!flyout) return;
+  flyout.getY = () => top;
+  flyout.position = function (this: PositionedFlyout) {
+    if (!this.isVisible() || !this.targetWorkspace.isVisible()) return;
+    const view = this.targetWorkspace.getMetricsManager().getViewMetrics();
+    this.height_ = Math.max(0, view.height - top);
+    this.setBackgroundPath(
+      this.getWidth() - this.CORNER_RADIUS,
+      this.height_ - 2 * this.CORNER_RADIUS,
+    );
+    this.positionAt_(this.getWidth(), this.getHeight(), this.getX(), top);
+  };
+}
+
 const workspaceXml = (ws: SB.WorkspaceSvg) =>
   SB.Xml.domToText(SB.Xml.workspaceToDom(ws));
 
@@ -264,6 +298,11 @@ export function App() {
       SB.ScratchProcedures.getProceduresCategory,
     );
     wsRef.current = ws;
+    offsetPalette(
+      ws,
+      Number.parseFloat(getComputedStyle(div).getPropertyValue("--strip-height")),
+    );
+    ws.resize();
 
     const s = stateRef.current;
     loadingRef.current = true;
@@ -411,7 +450,7 @@ export function App() {
       showToast({
         tone: "success",
         title: "Copied to clipboard",
-        body: `${await pngSize(png)} at ${formatScale(scale)}, transparent background`,
+        body: `${await pngSize(png)} at ${formatScale(scale)}`,
       });
     } catch (e) {
       showToast({
@@ -464,7 +503,10 @@ export function App() {
       : undefined;
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      style={{ "--palette-width": `${paletteWidth}px` } as CSSProperties}
+    >
       <header className="header">
         <h1 className="logo">
           <Logo />
@@ -575,33 +617,31 @@ export function App() {
       </header>
 
       <main className="stage">
-        <div className="toolbar">
-          <input
-            type="search"
-            className="search"
-            placeholder="Search blocks"
-            aria-label="Search blocks"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <button
-            type="button"
-            className="switch-btn"
-            aria-pressed={showExtensions}
-            title="Show extension categories"
-            onClick={() => setShowExtensions(!showExtensions)}
-          >
-            <span className={`switch${showExtensions ? " on" : ""}`} />
-            Extensions
-          </button>
-        </div>
         <div className={`workspace-wrap${showExtensions ? " ext" : ""}`}>
           <div ref={divRef} className="workspace" />
-          {empty && (
-            <div
-              className="empty-hint"
-              style={{ "--palette-width": `${paletteWidth}px` } as CSSProperties}
+          <div className="toolbar">
+            <input
+              type="search"
+              className="search"
+              placeholder="Search blocks"
+              aria-label="Search blocks"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <button
+              type="button"
+              className="switch-btn"
+              aria-pressed={showExtensions}
+              title="Show extension categories"
+              onClick={() => setShowExtensions(!showExtensions)}
             >
+              <span className={`switch${showExtensions ? " on" : ""}`} />
+              Extensions
+            </button>
+          </div>
+          <div className="sidebar-edge" />
+          {empty && (
+            <div className="empty-hint">
               <div>
                 <strong>Drag blocks here</strong>
                 <span>
@@ -609,32 +649,6 @@ export function App() {
                   with a transparent background.
                 </span>
               </div>
-            </div>
-          )}
-          {toast && (
-            <div className="toast" role="status" aria-live="polite">
-              <span className={`dot ${toast.tone}`} />
-              <div className="toast-body">
-                <strong>{toast.title}</strong>
-                <span>{toast.body}</span>
-              </div>
-              {toast.download && (
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => void download()}
-                >
-                  Download PNG
-                </button>
-              )}
-              <button
-                type="button"
-                className="icon-btn"
-                aria-label="Dismiss"
-                onClick={() => setToast(null)}
-              >
-                ×
-              </button>
             </div>
           )}
         </div>
@@ -837,6 +851,33 @@ export function App() {
           <button type="button" className="download" onClick={() => void download()}>
             Download PNG
             <span>{fileName(activeTab?.name ?? "")}</span>
+          </button>
+        </div>
+      )}
+
+      {toast && (
+        <div className="toast" role="status" aria-live="polite">
+          <span className={`dot ${toast.tone}`} />
+          <div className="toast-body">
+            <strong>{toast.title}</strong>
+            <span>{toast.body}</span>
+          </div>
+          {toast.download && (
+            <button
+              type="button"
+              className="btn"
+              onClick={() => void download()}
+            >
+              Download PNG
+            </button>
+          )}
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label="Dismiss"
+            onClick={() => setToast(null)}
+          >
+            ×
           </button>
         </div>
       )}
