@@ -141,6 +141,7 @@ export function estimateSize(
 ): [number, number] {
   if (isEmpty(workspace)) return [0, 0];
   const box = workspace.getCanvas().getBBox();
+  if (box.width === 0 || box.height === 0) return [0, 0];
   return [
     Math.ceil((box.width + PAD * 2) * scale),
     Math.ceil((box.height + PAD * 2) * scale),

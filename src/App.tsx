@@ -811,41 +811,18 @@ export function App() {
               {size[0] ? `${Math.ceil(size[0] * scale)} × ${Math.ceil(size[1] * scale)} px` : "No blocks yet"}
             </span>
           </div>
-          <div className="presets">
-            {[1, 2, 3, 4].map((v) => (
-              <button
-                key={v}
-                type="button"
-                className={`btn preset${scale === v ? " on" : ""}`}
-                onClick={() => setScale(v)}
-              >
-                {v}x
-              </button>
-            ))}
-          </div>
           <div className="fine">
-            <span className="label" style={{ flex: 1, fontWeight: 400 }}>
-              Fine-tune
-            </span>
-            <button
-              type="button"
-              className="btn"
-              aria-label="Smaller"
-              disabled={scale <= MIN_SCALE}
-              onClick={() => setScale(scale - 0.25)}
-            >
-              −
-            </button>
+            <input
+              type="range"
+              className="slider"
+              aria-label="Size"
+              min={MIN_SCALE}
+              max={MAX_SCALE}
+              step={0.05}
+              value={scale}
+              onChange={(e) => setScale(Number(e.target.value))}
+            />
             <span className="fine-value">{scale.toFixed(2)}x</span>
-            <button
-              type="button"
-              className="btn"
-              aria-label="Larger"
-              disabled={scale >= MAX_SCALE}
-              onClick={() => setScale(scale + 0.25)}
-            >
-              +
-            </button>
           </div>
           <div className="menu-sep" />
           <button type="button" className="download" onClick={() => void download()}>

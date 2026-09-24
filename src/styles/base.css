@@ -431,31 +431,17 @@ input::placeholder {
   color: var(--color-text-muted);
 }
 
-.presets {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.preset.on {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-strong);
-  font-weight: 700;
-}
-
 .fine {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.fine .btn {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  font-size: 15px;
-  font-weight: 400;
+.slider {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
 }
 
 .fine-value {
