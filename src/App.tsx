@@ -18,6 +18,8 @@ import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { version } from "../package.json";
 import {
+  blocksWith,
+  copyBlock,
   copyWorkspace,
   downloadWorkspace,
   estimateSize,
@@ -218,6 +220,31 @@ function linearZoom(ws: SB.WorkspaceSvg) {
   };
 }
 
+// "Copy Block to Clipboard" in the block right-click menu, next to Delete.
+// The registry is global, so the item calls whichever handler App set last.
+let onCopyBlock: (block: SB.BlockSvg) => void = () => {};
+
+function registerCopyBlockItem() {
+  const registry = SB.ContextMenuRegistry.registry;
+  if (registry.getItem("blockCopyPng")) return;
+  registry.register({
+    id: "blockCopyPng",
+    weight: 3,
+    scopeType: SB.ContextMenuRegistry.ScopeType.BLOCK,
+    displayText: (scope) => {
+      const n = scope.block ? blocksWith(scope.block).length : 1;
+      return n === 1
+        ? "Copy Block to Clipboard"
+        : `Copy ${n} Blocks to Clipboard`;
+    },
+    preconditionFn: (scope) =>
+      scope.block && !scope.block.isInFlyout ? "enabled" : "hidden",
+    callback: (scope) => {
+      if (scope.block) onCopyBlock(scope.block as SB.BlockSvg);
+    },
+  });
+}
+
 const workspaceXml = (ws: SB.WorkspaceSvg) =>
   SB.Xml.domToText(SB.Xml.workspaceToDom(ws));
 
@@ -406,6 +433,7 @@ export function App() {
     const div = divRef.current;
     if (!div) return;
     setupBlocks();
+    registerCopyBlockItem();
     const grid = getComputedStyle(document.documentElement)
       .getPropertyValue("--color-grid")
       .trim();
@@ -690,6 +718,25 @@ export function App() {
         body: `${w} × ${h} px at ${formatScale(scale)} size`,
       });
     },
+  };
+
+  onCopyBlock = async (block) => {
+    try {
+      const png = await copyBlock(block, scale);
+      showToast({
+        tone: "success",
+        icon: ClipboardCheck,
+        title: "Copied to clipboard",
+        body: `${await pngSize(png)} at ${formatScale(scale)} size`,
+      });
+    } catch (e) {
+      showToast({
+        tone: "error",
+        icon: ClipboardX,
+        title: "Couldn't copy",
+        body: e instanceof Error ? e.message : String(e),
+      });
+    }
   };
 
   async function copy() {
