@@ -5,6 +5,7 @@ import {
   ClipboardX,
   Download,
   FileX,
+  GraduationCap,
   type LucideIcon,
   Moon,
   Plus,
@@ -921,7 +922,7 @@ export function App() {
             data-tip="Tutorial"
             onClick={() => setTutorialOpen(true)}
           >
-            ?
+            <GraduationCap size={20} aria-hidden="true" />
           </button>
           {zoomAt && (
             <div
