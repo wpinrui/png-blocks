@@ -63,7 +63,6 @@ input::placeholder {
 .logo {
   display: flex;
   align-items: center;
-  width: var(--palette-width);
   margin: 0;
   padding: 0 16px;
   flex-shrink: 0;
