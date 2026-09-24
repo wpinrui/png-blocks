@@ -13,6 +13,7 @@ export type Command = {
   inputs?: string[];
   shape: string;
   category: string;
+  hasLoopArrow?: boolean;
 };
 
 const commands: Command[] = [
