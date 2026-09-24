@@ -42,7 +42,6 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 type Point = { x: number; y: number };
 type Cursor = Point & { ms: number; pressed: boolean; visible: boolean };
 type Ghost = Point & { ms: number; svg: SVGSVGElement; w: number; h: number };
-type Rect = { left: number; top: number; right: number; bottom: number };
 
 class Cancelled extends Error {}
 
@@ -51,12 +50,6 @@ const hatXml = (at: Point) =>
 
 const scriptXml = (at: Point) =>
   `<xml><block type="event_whenflagclicked" x="${at.x}" y="${at.y}"><next><block type="control_repeat_until"><value name="CONDITION"><block type="sensing_mousedown"></block></value><statement name="SUBSTACK"><block type="motion_movesteps"><value name="STEPS"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block></statement></block></next></block></xml>`;
-
-function overlap(a: Rect, b: Rect) {
-  const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
-  const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
-  return w > 0 && h > 0 ? w * h : 0;
-}
 
 function flyoutBlock(ws: SB.WorkspaceSvg, type: string) {
   const toolbox = ws.getToolbox() as unknown as {
@@ -140,29 +133,14 @@ export function Tutorial({
     return { x: r.left + r.width / 2 - w / 2, y: r.top + r.height / 2 - h / 2 };
   };
 
-  // Pick the spot in the canvas that covers the least of `avoid`.
-  const placeAvoiding = (avoid: Rect[]) => {
-    const c = hostRef.current.canvasRect();
+  // Put the card at a spot next to the step's action, kept on screen.
+  const placeAt = (x: number, y: number) => {
     const { w, h } = size();
-    if (!c) return;
-    const m = 20;
-    const spots: Point[] = [
-      { x: c.left + (c.width - w) / 2, y: c.top + (c.height - h) / 2 },
-      { x: c.right - w - m, y: c.bottom - h - m },
-      { x: c.left + m, y: c.bottom - h - m },
-      { x: c.right - w - m, y: c.top + m },
-    ];
-    let best = spots[0] as Point;
-    let bestCost = Number.POSITIVE_INFINITY;
-    for (const s of spots) {
-      const box = { left: s.x, top: s.y, right: s.x + w, bottom: s.y + h };
-      const cost = avoid.reduce((sum, a) => sum + overlap(box, a), 0);
-      if (cost < bestCost) {
-        best = s;
-        bestCost = cost;
-      }
-    }
-    setPos({ x: Math.max(m, best.x), y: Math.max(m, best.y) });
+    const m = 16;
+    setPos({
+      x: Math.max(m, Math.min(x, window.innerWidth - w - m)),
+      y: Math.max(m, Math.min(y, window.innerHeight - h - m)),
+    });
   };
 
   const center = () => {
@@ -228,20 +206,16 @@ export function Tutorial({
       return { x: Math.round(at.x), y: Math.round(at.y) };
     };
     const scriptAt = canvasPoint(60, 70);
-    const scriptBox: Rect = {
-      left: scriptAt.x - 20,
-      top: scriptAt.y - 20,
-      right: scriptAt.x + 320,
-      bottom: scriptAt.y + 240,
-    };
-    const rectOf = (sel: string): Rect | null =>
-      document.querySelector(sel)?.getBoundingClientRect() ?? null;
+    const scriptBox = { right: scriptAt.x + 280 };
     const search = document.querySelector<HTMLInputElement>(".search");
     const copyBtn = document.querySelector<HTMLElement>(".copy-main");
 
     const runSearch = async () => {
       h.load("");
-      placeAvoiding([rectOf(".search")].filter((r): r is Rect => !!r));
+      // Just right of the search strip, level with the search box.
+      const sr = search?.getBoundingClientRect();
+      const c = h.canvasRect();
+      if (sr && c) placeAt(c.left + 24, sr.top);
       for (;;) {
         h.setQuery("");
         const r = search?.getBoundingClientRect();
@@ -266,7 +240,8 @@ export function Tutorial({
     const runDrag = async () => {
       h.setQuery(QUERY);
       h.load(hatXml(wsPoint(scriptAt)));
-      placeAvoiding([scriptBox]);
+      // Beside the script being built.
+      placeAt(scriptBox.right + 16, scriptAt.y - 10);
       await wait(400);
       for (;;) {
         const hat = ws.getTopBlocks(false)[0] as SB.BlockSvg | undefined;
@@ -304,16 +279,9 @@ export function Tutorial({
     const runCopy = async () => {
       h.setQuery("");
       h.load(scriptXml(wsPoint(scriptAt)));
-      const btn = copyBtn?.getBoundingClientRect();
-      const toast: Rect | null = btn
-        ? {
-            left: window.innerWidth - 460,
-            top: btn.top,
-            right: window.innerWidth,
-            bottom: btn.bottom + 140,
-          }
-        : null;
-      placeAvoiding([scriptBox, ...(toast ? [toast] : [])]);
+      // Under the Copy PNG button, below where its toast drops in.
+      const btn = copyBtn?.parentElement?.getBoundingClientRect();
+      if (btn) placeAt(btn.right - size().w, btn.bottom + 110);
       await wait(300);
       for (;;) {
         const r = copyBtn?.getBoundingClientRect();
