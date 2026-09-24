@@ -230,7 +230,20 @@ function linearZoom(ws: SB.WorkspaceSvg) {
 
 // "Copy Block to Clipboard" in the block right-click menu, next to Delete.
 // The registry is global, so the item calls whichever handler App set last.
-let onCopyBlock: (block: SB.BlockSvg) => void = () => {};
+let onCopyBlock: (
+  block: SB.BlockSvg,
+  at: { x: number; y: number },
+) => void = () => {};
+
+// Where to show the toast: the menu click if it carries a position, else
+// the block's bottom-left corner.
+function pointFor(e: Event | undefined, block: SB.BlockSvg) {
+  if (e instanceof MouseEvent && (e.clientX || e.clientY)) {
+    return { x: e.clientX, y: e.clientY };
+  }
+  const r = block.getSvgRoot().getBoundingClientRect();
+  return { x: r.left, y: r.bottom };
+}
 
 function registerCopyBlockItem() {
   const registry = SB.ContextMenuRegistry.registry;
@@ -247,22 +260,16 @@ function registerCopyBlockItem() {
     },
     preconditionFn: (scope) =>
       scope.block && !scope.block.isInFlyout ? "enabled" : "hidden",
-    callback: (scope) => {
-      if (scope.block) onCopyBlock(scope.block as SB.BlockSvg);
+    callback: (scope, openEvent, selectEvent) => {
+      const block = scope.block as SB.BlockSvg | undefined;
+      if (!block) return;
+      // Read the position now, before the copy changes the selection.
+      const at = pointFor(selectEvent, block);
+      if (at.x === 0 && at.y === 0) Object.assign(at, pointFor(openEvent, block));
+      onCopyBlock(block, at);
     },
   });
 }
-
-// Where the pointer last went down, so a toast can appear beside it.
-const lastPointer = { x: 0, y: 0 };
-document.addEventListener(
-  "pointerdown",
-  (e) => {
-    lastPointer.x = e.clientX;
-    lastPointer.y = e.clientY;
-  },
-  true,
-);
 
 const workspaceXml = (ws: SB.WorkspaceSvg) =>
   SB.Xml.domToText(SB.Xml.workspaceToDom(ws));
@@ -755,8 +762,7 @@ export function App() {
     },
   };
 
-  onCopyBlock = async (block) => {
-    const at = { ...lastPointer };
+  onCopyBlock = async (block, at) => {
     try {
       const png = await copyBlock(block, scale);
       showToast({
