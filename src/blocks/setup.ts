@@ -2,6 +2,7 @@ import * as En from "blockly/msg/en";
 import * as SB from "scratch-blocks";
 import { CATALOG, type BlockDef } from "../catalog";
 import { renderSvg } from "../render";
+import { openDialog, type Tone } from "../ui/dialog";
 
 export const MEDIA = "/scratch-blocks-media/";
 
@@ -80,13 +81,31 @@ function editableDropdown(menu: string, name: string, base: Option[]) {
   };
 }
 
-function customValidator(menu: string) {
-  return (value: string) => {
+const MENU_TONES: Record<string, Tone> = {
+  motion: "motion",
+  looks: "looks",
+  event: "event",
+};
+
+function customValidator(menu: string, colour: string) {
+  return function (this: SB.FieldDropdown, value: string) {
     if (value !== CUSTOM_VALUE) return value;
-    const text = window.prompt("Value");
-    if (!text) return null;
-    addCustom(menu, text);
-    return text;
+    const field = this;
+    void openDialog({
+      kind: "text",
+      title: "Other value",
+      label: "Value",
+      initial: "",
+      hint: "Saved to this menu for next time.",
+      confirm: "Use value",
+      tone: MENU_TONES[colour] ?? "more",
+    }).then((text) => {
+      if (!text) return;
+      addCustom(menu, text);
+      field.setValue(text);
+    });
+    // Keep the old value until the dialog answers.
+    return null;
   };
 }
 
@@ -103,7 +122,7 @@ function defineMenu(
         args0: [editableDropdown(type, field, base)],
         extensions: [`colours_${colour}`, "output_string"],
       });
-      this.getField(field)?.setValidator(customValidator(type));
+      this.getField(field)?.setValidator(customValidator(type, colour));
     },
   };
 }
@@ -166,7 +185,7 @@ function defineCoreMenus() {
         extensions: ["colours_event", "shape_hat"],
       });
       this.getField("BACKDROP")?.setValidator(
-        customValidator("event_whenbackdropswitchesto"),
+        customValidator("event_whenbackdropswitchesto", "event"),
       );
     },
   };
@@ -194,7 +213,9 @@ function defineCoreMenus() {
         outputShape: 2,
         extensions: ["colours_sensing", "output_number"],
       });
-      this.getField("PROPERTY")?.setValidator(customValidator("sensing_of"));
+      this.getField("PROPERTY")?.setValidator(
+        customValidator("sensing_of", "sensing"),
+      );
     },
   };
 }
@@ -363,29 +384,64 @@ function procedureText(mutation: Element): string {
   });
 }
 
+const VAR_TONES: Record<string, Tone> = {
+  broadcast_msg: "event",
+  list: "list",
+};
+
+function sentenceCase(text: string) {
+  return text.charAt(0) + text.slice(1).toLowerCase();
+}
+
 function setupPrompts() {
-  SB.ScratchVariables.setPromptHandler((message, defaultValue, callback) => {
-    callback(window.prompt(message, defaultValue), []);
-  });
+  SB.ScratchVariables.setPromptHandler(
+    (message, defaultValue, callback, title, varType) => {
+      const renaming = defaultValue !== "";
+      const isMessage = varType === "broadcast_msg";
+      void openDialog({
+        kind: "text",
+        title: sentenceCase(title ?? "Name"),
+        label: message.replace(/:$/, ""),
+        initial: defaultValue,
+        placeholder: isMessage
+          ? "e.g. game over"
+          : varType === "list"
+            ? "e.g. high scores"
+            : "e.g. score",
+        hint: isMessage
+          ? undefined
+          : "Lives in this tab. Duplicating the tab copies it too.",
+        confirm: renaming ? "Rename" : "Create",
+        tone: VAR_TONES[varType ?? ""] ?? "data",
+      }).then((text) => callback(text as string, []));
+    },
+  );
   SB.ScratchProcedures.externalProcedureDefCallback = (mutation, done) => {
-    const text = window.prompt(
-      "Block text. Use (name) for a number or text input, <name> for a boolean.",
-      procedureText(mutation),
-    );
-    if (!text?.trim()) {
-      done();
-      return;
-    }
-    const { proccode, names, defaults } = parseProcedure(text);
-    const oldIds: string[] = JSON.parse(
-      mutation.getAttribute("argumentids") ?? "[]",
-    );
-    const ids = names.map((_, i) => oldIds[i] ?? SB.utils.idGenerator.genUid());
-    mutation.setAttribute("proccode", proccode);
-    mutation.setAttribute("argumentids", JSON.stringify(ids));
-    mutation.setAttribute("argumentnames", JSON.stringify(names));
-    mutation.setAttribute("argumentdefaults", JSON.stringify(defaults));
-    done(mutation);
+    const initial = procedureText(mutation);
+    // New blocks arrive with scratch-blocks' placeholder name.
+    const editing = initial !== "block name";
+    void openDialog({
+      kind: "block",
+      initial: editing ? initial : "",
+      editing,
+    }).then((text) => {
+        if (!text?.trim()) {
+          done();
+          return;
+        }
+        const { proccode, names, defaults } = parseProcedure(text);
+        const oldIds: string[] = JSON.parse(
+          mutation.getAttribute("argumentids") ?? "[]",
+        );
+        const ids = names.map(
+          (_, i) => oldIds[i] ?? SB.utils.idGenerator.genUid(),
+        );
+        mutation.setAttribute("proccode", proccode);
+        mutation.setAttribute("argumentids", JSON.stringify(ids));
+        mutation.setAttribute("argumentnames", JSON.stringify(names));
+        mutation.setAttribute("argumentdefaults", JSON.stringify(defaults));
+        done(mutation);
+    });
   };
 }
 

@@ -1,6 +1,8 @@
 import * as SB from "scratch-blocks";
 import { trim } from "../render";
 
+const PAD = 4;
+
 const STYLE_PROPS = [
   "fill",
   "fill-opacity",
@@ -87,7 +89,7 @@ export async function workspacePng(
   clone.removeAttribute("transform");
   await inlineImages(clone);
 
-  const pad = 4;
+  const pad = PAD;
   const svgNs = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNs, "svg");
   const w = box.width + pad * 2;
@@ -125,10 +127,30 @@ export async function workspacePng(
   }
 }
 
+export function isEmpty(workspace: SB.WorkspaceSvg): boolean {
+  return (
+    workspace.getTopBlocks(false).length === 0 &&
+    workspace.getTopComments(false).length === 0
+  );
+}
+
+// Output size before trimming, which can shave a few pixels off.
+export function estimateSize(
+  workspace: SB.WorkspaceSvg,
+  scale: number,
+): [number, number] {
+  if (isEmpty(workspace)) return [0, 0];
+  const box = workspace.getCanvas().getBBox();
+  return [
+    Math.ceil((box.width + PAD * 2) * scale),
+    Math.ceil((box.height + PAD * 2) * scale),
+  ];
+}
+
 export async function copyWorkspace(
   workspace: SB.WorkspaceSvg,
   scale: number,
-): Promise<void> {
+): Promise<Blob> {
   // Chrome reports any render failure as a generic DataError, so keep the
   // real one to rethrow.
   let failure: unknown;
@@ -141,4 +163,20 @@ export async function copyWorkspace(
   } catch (e) {
     throw failure ?? e;
   }
+  return png;
+}
+
+export async function downloadWorkspace(
+  workspace: SB.WorkspaceSvg,
+  scale: number,
+  fileName: string,
+): Promise<Blob> {
+  const png = await workspacePng(workspace, scale);
+  const url = URL.createObjectURL(png);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return png;
 }

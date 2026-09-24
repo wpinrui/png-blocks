@@ -1,18 +1,58 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Semantic color tokens (dark theme). The ONLY file allowed to hold raw hex;
+  /* Semantic color tokens (light theme). The ONLY file allowed to hold raw hex;
      everywhere else references these via var(). */
-  --color-bg: #0d1117;
-  --color-surface: #161b22;
-  --color-surface-raised: #21262d;
-  --color-border: #30363d;
-  --color-text: #e6edf3;
-  --color-text-muted: #9ba7b4;
-  --color-accent: #4493f8;
+  --color-bg: #f4f6fa;
+  --color-header: #e6ebf3;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f6f8fb;
+  --color-hover: #f1f4f9;
+  --color-hover-strong: #e1e6ee;
+  --color-selected: #eef3fb;
+  --color-border: #d3dae5;
+  --color-border-soft: #e3e8ef;
+  --color-switch-off: #c9d0dc;
+  --color-text: #2f3647;
+  --color-text-muted: #5e6679;
+  --color-text-faint: #8a91a3;
+  --color-text-scratch: #575e75;
+  --color-accent: #4c97ff;
+  --color-accent-hover: #4280d7;
+  --color-accent-active: #3373cc;
+  --color-accent-strong: #2a5fa8;
+  --color-accent-soft: #eaf2ff;
+  --color-accent-ring: rgba(76, 151, 255, 0.22);
+  --color-on-accent: #ffffff;
+  --color-on-accent-soft: rgba(255, 255, 255, 0.22);
+  --color-on-accent-divider: rgba(255, 255, 255, 0.35);
+  --color-danger: #d93f47;
+  --color-danger-hover: #c0343c;
+  --color-danger-text: #c8323a;
+  --color-danger-soft: #fdf0f0;
+  --color-success: #59c059;
+  --color-warning: #ffab19;
+  --color-grid: #dddddd;
+  --color-scrim: rgba(33, 41, 58, 0.32);
+  --shadow-popover: 0 12px 32px rgba(24, 34, 56, 0.16);
+  --shadow-modal: 0 24px 64px rgba(20, 30, 50, 0.28);
 
-  /* Typography: 16px base, rem-based scale, 14px (0.875rem) floor for fine print. */
-  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-size-base: 1rem;
-  --font-size-caption: 0.875rem;
+  /* Scratch category colours, used for dialog accent dots. */
+  --color-cat-looks: #9966ff;
+  --color-cat-looks-edge: #774dcb;
+  --color-cat-data: #ff8c1a;
+  --color-cat-data-edge: #db6e00;
+  --color-cat-list: #ff661a;
+  --color-cat-list-edge: #e64d00;
+  --color-cat-event: #ffbf00;
+  --color-cat-event-edge: #cc9900;
+  --color-cat-more: #ff6680;
+  --color-cat-more-edge: #ff3355;
+  --color-cat-motion: #4c97ff;
+  --color-cat-motion-edge: #3373cc;
+
+  --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-size-base: 14px;
+  --font-size-caption: 13px;
+  --font-size-small: 12px;
 }
