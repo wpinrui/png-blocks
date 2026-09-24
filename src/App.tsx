@@ -795,7 +795,15 @@ export function App() {
           >
             scratchblocks
           </a>{" "}
-          (MIT). Not affiliated with the Scratch Foundation or MIT.
+          (MIT). Built by{" "}
+          <a
+            href="https://claude.com/claude-code"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Claude Code
+          </a>
+          . Not affiliated with the Scratch Foundation or MIT.
         </div>
         <div className="footer-repo">
           <GitHubMark />
