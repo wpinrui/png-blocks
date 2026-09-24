@@ -321,9 +321,10 @@ function categoryXml(c: Category): string {
   return `<category ${attrs}>${c.items.join("")}</category>`;
 }
 
+// The ext-sep separator hosts the app's extensions chevron (see App).
 export function toolboxXml(showExtensions: boolean): string {
-  const shown = showExtensions ? allCategories() : CORE;
-  return `<xml style="display: none">${shown.map(categoryXml).join("")}</xml>`;
+  const ext = showExtensions ? extensionCategories() : [];
+  return `<xml style="display: none">${CORE.map(categoryXml).join("")}<sep css-container="ext-sep"></sep>${ext.map(categoryXml).join("")}</xml>`;
 }
 
 // ---------- Search ----------
