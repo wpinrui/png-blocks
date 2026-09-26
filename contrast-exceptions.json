@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "pairing": "accent on bg",
+    "ratio": 2.7,
+    "reason": "Scratch brand blue, kept to match the Scratch editor"
+  },
+  {
+    "pairing": "accent on surface",
+    "ratio": 2.93,
+    "reason": "Scratch brand blue, kept to match the Scratch editor"
+  }
+]
