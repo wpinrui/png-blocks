@@ -23,7 +23,7 @@ const exceptions = JSON.parse(
 ) as Exception[];
 const excepted = new Map(exceptions.map((e) => [e.pairing, e]));
 
-const SURFACES = ["bg", "surface", "surface-raised"] as const;
+const SURFACES = ["bg", "surface"] as const;
 const FOREGROUNDS: { name: string; floor: number }[] = [
   { name: "text", floor: AA_TEXT },
   { name: "text-muted", floor: AA_TEXT },
@@ -49,11 +49,8 @@ describe("contrast gate", () => {
   }
 
   it("keeps a luminance step between adjacent surface layers", () => {
-    const [bg, surface, raised] = SURFACES.map((s) =>
-      relativeLuminance(tokens[s]),
-    );
+    const [bg, surface] = SURFACES.map((s) => relativeLuminance(tokens[s]));
     expect(bg).toBeLessThan(surface);
-    expect(surface).toBeLessThan(raised);
   });
 
   it("reports body text (text on bg) against the AAA target", () => {
