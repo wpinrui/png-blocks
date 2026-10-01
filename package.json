@@ -18,7 +18,7 @@
     "lucide-react": "^1.48.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "scratch-blocks": "2.1.19",
+    "scratch-blocks": "2.1.20",
     "scratchblocks": "3.7.1"
   },
   "devDependencies": {

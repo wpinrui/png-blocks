@@ -1371,10 +1371,10 @@ scheduler@^0.28.0:
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.28.0.tgz#03d3ca348aeaf8b7502f64468f217b27523f9695"
   integrity sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==
 
-scratch-blocks@2.1.19:
-  version "2.1.19"
-  resolved "https://registry.yarnpkg.com/scratch-blocks/-/scratch-blocks-2.1.19.tgz#2708a103d93109a438ed2fd1dda7054f23afee46"
-  integrity sha512-FgRoGhUkiGEmjblwmd5k+0HPlonoXkk1arwnnZBcSE05MKoZjWiP/ksHCfCcr2w/qqYQBrCynBk6flmwkcsUnA==
+scratch-blocks@2.1.20:
+  version "2.1.20"
+  resolved "https://registry.yarnpkg.com/scratch-blocks/-/scratch-blocks-2.1.20.tgz#d6a5bee8c5724ac2545b50390336ddfec9f5b657"
+  integrity sha512-Let07fNTZd4hZC4U1k4DfXmxMwTZU74TbNb48ZXIwsCzicOGL36ZiUMbHNpXB/SkMhVQkR9dIX8RoAxkJIR80Q==
   dependencies:
     "@blockly/continuous-toolbox" "^7.0.8"
     "@blockly/field-colour" "^6.0.11"
