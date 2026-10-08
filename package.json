@@ -22,7 +22,7 @@
     "scratchblocks": "3.7.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.16",
+    "@biomejs/biome": "^2.5.15",
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@testing-library/dom": "^10.4.0",
